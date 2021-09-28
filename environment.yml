@@ -6,4 +6,3 @@ dependencies:
   - r-ggplot2
   - r-dplyr
   - r-tidyr
-  - r-remotes
