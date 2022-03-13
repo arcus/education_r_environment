@@ -4,3 +4,4 @@ dependencies:
   - r-base=4.1.2
   - r-rcpp
   - r-tidyverse
+  - r-markdown
