@@ -1,0 +1,292 @@
+---
+title: "Untitled"
+author: "Ima Coder"
+date: "5/25/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Bring in Libraries
+
+```{r}
+library(printr)
+library(tidyverse)
+```
+
+## First Pivot Work
+
+### Bring in Sample Data
+
+Let's do a somewhat easier pivot to start with.  We've copied this example from the `pivot_longer` help file (you can find it by typing `?pivot_longer` in the Console).
+
+We'll begin with the simplest case where column names are character data. First, let's look at the data (Pew religious survey data) as it is currently:
+
+```{r}
+relig_income
+```
+
+What uniquely identifies an observation?  An observation in this case is a group of people sharing the same religion, and that observation is uniquely identified by just one column, `religion`.
+
+### Pivot Longer!
+
+Now can `pivot_longer`.  We use the pipe (`%>%`) to supply the first required argument, the `data` we want to use, and we specify the other required argument, `cols`, by indicating that we want to pivot every column except for religion.
+
+```{r}
+religion_long <- relig_income %>%
+  pivot_longer(!religion)
+```
+
+Now let's look at the long data.  We'll only take a peek at the first 20 rows.
+
+```{r}
+head(religion_long, 20)
+```
+
+OK, that's pretty good, but since we know that all of our original variables were income levels, and our values were counts, we can change the column names to be "income" and "count" instead of "name" and "value".  
+
+Additionally, even though R can tell that "!religion" is the `cols` argument, we want to make that more obvious for human readers of our code, so we'll specify that.  Let's re-write our `religion_long` code.  Please fill in the values for `cols`, `names_to`, and `values_to`.  If you get stuck, you can open the `reshape_data_solutions.Rmd` file to see the completed code.
+
+```{r}
+religion_long <- relig_income %>%
+  pivot_longer(cols = !religion,
+               names_to = "income", 
+               values_to = "count")
+```
+
+What does that look like now?
+
+
+```{r}
+head(religion_long, 20)
+```
+
+Great!  We're in a clean, well-labeled long format.
+
+
+
+
+### Pivot Wider
+
+We now have a "long" version of religion data.  Can we make that long data wide again using `pivot_wider`?  Let's try!
+
+```{r}
+religion_wide <- religion_long %>% pivot_wider()
+
+religion_wide
+```
+
+Oh no!  Nothing changed! What went wrong?  Well, remember that when we first did `pivot_longer`, our second and third columns were called "name" and "value", and we decided to give them more descriptive names, "income" and "count".  Since we gave names that don't match the default values, we have to tell `pivot_wider` about those names, so that the function knows which column holds variable names (in our case, `income`) and which column holds values (in our case, `count`).  Add the correct values below for `names_from` and `values_from`. If you get stuck, open the `reshape_data_solutions.Rmd` file!
+
+```{r}
+religion_wide <- religion_long %>% 
+  pivot_wider(names_from = income,
+              values_from = count)
+
+religion_wide
+```
+
+OK, great!  We've pivoted back to our original format.
+
+But what if we realized we'd rather flip the role of religion and income?  What if we'd rather have income brackets be our observation, and religions our variables?  We can change where we get our `names_from`:
+
+```{r}
+income_wide <- religion_long %>% 
+  pivot_wider(names_from = religion,
+              values_from = count)
+
+income_wide
+```
+
+And that's part of the power of putting your data into long format -- it's often simple to pour that "molten" or long data into new shapes with a single command.
+
+What if we start with data that comes to us in a long format, and we want to reshape it to be wide data for the first time?  There are some examples of this kind of work in the help file for `pivot_wider`, and we'll try one of those, now.  Let's take a look at `fish_encounters`.
+
+```{r}
+head(fish_encounters, 20)
+```
+
+OK, so we'd like to pivot wider, so that each `station` is a variable across the top and the `fish` ids are rows.  The value of if fish were seen at each station would be taken from `seen`.  Let's first see if we can just not specify anything at all and just use `pivot_wider` without any explicit arguments.
+
+```{r}
+fish_encounters %>% pivot_wider()
+```
+
+Uh-oh, that didn't actually do anything!  That's because, remember, `pivot_longer` and `pivot_wider` have a standard naming convention for your variable name ("name") and values ("value").  That's not what we have here.  Rather, our variable name column has the title of "station" and our values have the title "seen".  So let's try again.  Add the correct values for `names_from` and `values_from`.  Stuck?  Look at `reshape_data_solutions.Rmd`!
+
+```{r}
+fish_encounters %>%
+  pivot_wider(names_from = station, 
+              values_from = seen)
+```
+
+Great!  We're super close to what we'd like to see.  But it seems that the "1" that appears isn't a count, but rather a logical (True/False) indicator, indicating that a given fish was seen at a given location.  Let's do a quick data transformation to make that more easily understood: We'll transform numbers to T/F (1 is always TRUE, 0 is always FALSE) and then fill any missing values with FALSE.  
+
+```{r}
+fish_encounters %>%
+  pivot_wider(names_from = station, 
+              values_from = seen,
+              values_fn = list(seen = as.logical),
+              values_fill = FALSE)
+```
+
+That's our introduction to `pivot_wider`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Bring in Biosample Data
+
+Let's bring in that not-tidy but wide biosample data we've been looking at in the module materials:
+
+```{r}
+biosample_data <- read_csv("biosample_data.csv")
+```
+
+## Look at Data
+
+Let's take a peek at the first few rows of data.  You may also want to try other methods of looking at the data, like `View` or by simply entering the name of the data frame.
+
+```{r}
+head(biosample_data)
+```
+
+
+
+
+
+## Get rid of those suffixes!
+
+Our data exists in two sets of columns that are identical, except for their suffixes.  We also have an un-suffixed variable, `subject_id`.  We'd like to get our data into a long format (from which we can then transform into any number of different wide formats), and there's no real difference between `_1` and `_2` variables -- they measure the same thing, but what's different is the order they were measured.  We'd rather solve this problem by including a sequence number for each `biosample_id`.
+
+Let's first isolate all of our `_1` or first biosamples.  We'd like to:
+
+* Select only the columns we want: 
+   - `subject_id`
+   - all the columns that end in `_1`
+* Rename all the `_1` columns, removing that suffix (we can use `str_remove` to remove part of a string)
+* Add a new column called "sequence", that will contain the number 1, just in case it turns out to be important that this was the first biosample collection.
+
+```{r}
+biosample_first <- biosample_data %>% 
+  select(subject_id, ends_with("_1")) %>%
+  rename_with(~str_remove(., '_1')) %>%
+  mutate(sequence = 1)
+```
+
+What does this look like?
+
+```{r}
+biosample_first
+```
+
+We then want to do the same thing with our second biosamples, but using "2" instead of "1".  Copy the code from above and make sure to replace all the "1" with "2" below.  As always, `reshape_data_solutions.Rmd` is available with the completed code.
+
+```{r}
+biosample_second <- biosample_data %>% 
+  select(subject_id, ends_with("_2")) %>%
+  rename_with(~str_remove(., '_2')) %>%
+  mutate(sequence = 2)
+```
+
+What does this look like?
+
+```{r}
+biosample_second
+```
+
+Hmmm... we want to get rid of the empty data in `biosample_second`.  We can do that using the `dplyr::filter()` functionality.  Let's rewrite our transformer, adding one extra line at the end:
+
+```{r}
+biosample_second <- biosample_data %>% 
+  select(subject_id, ends_with("_2")) %>%
+  rename_with(~str_remove(., '_2')) %>%
+  mutate(sequence = 2) %>%
+  filter(!is.na(biosample_id))
+```
+
+**Now** what does this look like?
+
+```{r}
+biosample_second
+```
+
+
+
+
+
+## Turn wide data into long data
+
+At this point, you might be thinking, "Hey!  If we just stack `biosample_first` and `biosample_second`, we'll be done, and have some tidy data!".  You're not wrong, and you might be tempted to do just that and not bother with transforming wide data to long data.  Bear with us however, and hopefully by the end you'll understand why the transformation to long data is so useful.
+
+### `pivot_longer`
+
+What are we going to pivot to longer?  Our starting dataset will be the stacked `biosample_first` and `biosample_second`.  We can vertically stack these two data frames easily, since they have the same column names.  We'll do that using the `bind_rows` command.
+
+Then we'll pivot!  We have to say which columns we want to pivot, which in our case is everything except for `biosample_id`.  Then we will give the names of two columns: our variable names column, which we'd like to call "key", and our variable values column, which we'll call "value".  Let's try this!  This time, please add three things: the `cols` you want to pivot (everything but `biosample_id`), the `names_to` string, and the `values_to` string.  `reshape_data_solutions.Rmd` has the completed code for you, if you get stuck!  Try running the code -- we think you'll get an error, which we'll explain next.
+
+```{r error = TRUE}
+biosample_data_long <- bind_rows(biosample_first, biosample_second) %>%
+    pivot_longer(!biosample_id,
+                 names_to = "key",
+                 values_to = "value")
+```
+
+What happened?  There's a conflict.  Since we're combining all the values of our data frame to a single column, that single column has to have just one data type.  And that's not what we have.  We have some values that are numbers (like our `id` columns) and some that are text (the rest of our columns).  Let's add another line of code to transform all of values to character.
+
+```{r error = TRUE}
+biosample_data_long <- bind_rows(biosample_first, biosample_second) %>%
+    pivot_longer(!biosample_id,
+                 names_to = "key",
+                 values_to = "value",
+                 values_transform = list(value=as.character))
+```
+
+OK!  That time we ran without an error.  Let's look at what that data looks like now:
+
+```{r}
+head(biosample_data_long, 20)
+```
+
+It's interesting to realize that if you had other data in some other place relating to the same biosample ids, for example, storage information or freezer location, you could make that into long data and just add it to this stack of key-value pairs.  Joining datasets that are already in long format is a simple process (make sure the column names match, then use `bind_rows`).
+
+
+
+
+
+
+# Pivoting Long Data to Wide
+
+Ideally, what we'd like to eventually see is a tidy dataset that looks more like this:
+
+| biosample_id | subject_id | collection_date | collection_time | sample_type | collection_method | collected_by_id |  sample_size | sequence |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 3380629109 | 876123	| 2019-05-14 | 09:15 | blood	 | venipuncture	| 4511 |	10 ml | 1 |
+
+
+Given that we've got this data in long format already, it will be easy to pivot it back to wide!
+
+```{r}
+biosample_data_tidy <- biosample_data_long %>%
+  pivot_wider(names_from = key,
+              values_from = value)
+
+biosample_data_tidy
+```
+
+And we're done.  This data contains the same information we began with, but in a much tidier format.
+
+
