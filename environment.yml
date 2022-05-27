@@ -5,3 +5,4 @@ dependencies:
   - r-rcpp
   - r-tidyverse
   - r-markdown
+  - r-printr
