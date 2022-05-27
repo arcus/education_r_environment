@@ -32,7 +32,7 @@ What uniquely identifies an observation?  An observation in this case is a group
 
 ### Pivot Longer!
 
-Now can `pivot_longer`.  We use the pipe (`%>%`) to supply the first required argument, the `data` we want to use, and we specify the other required argument, `cols`, by indicating that we want to pivot every column except for religion.
+Now can `pivot_longer`.  We use the pipe (`%>%`) to supply the first required argument, the `data` we want to use, and we specify the other required argument, `cols`, by indicating that we want to pivot every column except for religion.  We use the exclamation point to say "not", so `!religion` means "not the religion column, but everything else".
 
 ```{r}
 religion_long <- relig_income %>%
