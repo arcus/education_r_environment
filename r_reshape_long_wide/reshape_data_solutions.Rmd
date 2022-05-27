@@ -9,6 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
+This R Markdown file is intended to accompany the **Reshaping Data in R: Long and Wide Data** training module at <https://liascript.github.io/course/?https://raw.githubusercontent.com/arcus/education_modules/main/r_reshape_long_wide/r_reshape_long_wide.md> 
+
 ## Bring in Libraries
 
 ```{r}
@@ -64,6 +66,8 @@ head(religion_long, 20)
 ```
 
 Great!  We're in a clean, well-labeled long format.
+
+
 
 
 
@@ -133,11 +137,6 @@ fish_encounters %>%
 ```
 
 That's our introduction to `pivot_wider`.
-
-
-
-
-
 
 
 
@@ -270,13 +269,6 @@ It's interesting to realize that if you had other data in some other place relat
 
 # Pivoting Long Data to Wide
 
-Ideally, what we'd like to eventually see is a tidy dataset that looks more like this:
-
-| biosample_id | subject_id | collection_date | collection_time | sample_type | collection_method | collected_by_id |  sample_size | sequence |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 3380629109 | 876123	| 2019-05-14 | 09:15 | blood	 | venipuncture	| 4511 |	10 ml | 1 |
-
-
 Given that we've got this data in long format already, it will be easy to pivot it back to wide!
 
 ```{r}
@@ -287,6 +279,17 @@ biosample_data_tidy <- biosample_data_long %>%
 biosample_data_tidy
 ```
 
-And we're done.  This data contains the same information we began with, but in a much tidier format.
+Now this data contains the same information we began with, but in a much tidier format.  However, it will be useful to change our data types to be more appropriate.  Let's do that to finish up!  We'll save our really long integer field (biosample_id) as a double, our regular integer fields (the subject_id, collected_by_id, and sequence fields) as integer and our date as date.  We'll leave everything else alone!  We could change the time field from character format to a time format using lubridate, but that work goes a bit beyond the scope of what we want to cover in this module.
+
+```{r}
+biosample_data_tidy %>% mutate(across(biosample_id,
+                                      as.double),
+                               across(c(subject_id, 
+                                      collected_by_id, 
+                                      sequence),
+                                      as.integer),
+                               across(collection_date,
+                                      as.Date))
+```
 
 
