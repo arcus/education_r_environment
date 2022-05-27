@@ -68,9 +68,9 @@ head(religion_long, 20)
 Great!  We're in a clean, well-labeled long format.
 
 
-
-
-
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
 
 ### Pivot Wider
 
@@ -139,9 +139,9 @@ fish_encounters %>%
 That's our introduction to `pivot_wider`.
 
 
-
-
-
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
 
 
 
@@ -163,9 +163,9 @@ Let's take a peek at the first few rows of data.  You may also want to try other
 head(biosample_data)
 ```
 
-
-
-
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
 
 ## Get rid of those suffixes!
 
@@ -222,9 +222,9 @@ biosample_second <- biosample_data %>%
 ```{r}
 biosample_second
 ```
-
-
-
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
 
 
 ## Turn wide data into long data
@@ -262,9 +262,9 @@ head(biosample_data_long, 20)
 
 It's interesting to realize that if you had other data in some other place relating to the same biosample ids, for example, storage information or freezer location, you could make that into long data and just add it to this stack of key-value pairs.  Joining datasets that are already in long format is a simple process (make sure the column names match, then use `bind_rows`).
 
-
-
-
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
 
 
 # Pivoting Long Data to Wide
