@@ -202,7 +202,7 @@ ggplot(msleep_clean, aes(x=bodywt, y=brainwt)) +
   geom_point()
 ```
 
-It produces the scatterplot we asked for, but you'll also see a warning saying "Removed 27 rows containing missing values (geom_point)" to remind you that it's ignoring any observations that are missing for either of the two variables we're plotting.
+It produces the scatterplot we asked for, but you'll also see a warning saying "Removed 27 rows containing missing values (geom_point)" to remind you that it's ignoring any observations that are missing for either of the two variables we're plotting. (Note that this warning will appear above the plot in the "R Console" box just below the code chunk rather than on the plot itself. If you run the ggplot code in the console instead of running it as a chunk in the rmd document, then the plot itself will appear in the Plots pane and the warning will print in the console.)
 
 ### Other arguments for handling missingness
 
