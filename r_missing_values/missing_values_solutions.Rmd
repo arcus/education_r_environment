@@ -115,7 +115,7 @@ One option would be to filter these rows out of the data completely, so these an
 Fill in this code to mark values for `sleep_total` that are over 18 as missing (remember you can look at the solutions file if you get stuck!):
 
 ```{r}
-msleep_clean <- mutate(msleep_clean, sleep_total = if_else(sleep_total > 18, NA, sleep_total))
+msleep_clean <- mutate(msleep_clean, sleep_total = ifelse(sleep_total > 18, NA, sleep_total))
 ```
 
 To check that it worked, let's look at the updated summary stats for `sleep_total`: 
