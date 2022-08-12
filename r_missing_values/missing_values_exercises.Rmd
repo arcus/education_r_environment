@@ -15,7 +15,7 @@ Let's take a look at the data:
 head(msleep)
 ```
 
-Note that this is one of the example datasets that comes built-in when you install the `tidyverse` set of packages, so it's already available to you without you having to read it in or download anything. 
+Note that this is one of the example datasets that comes built-in when you install the `tidyverse` set of packages, so it's already available to you without you having to read it in or download anything.
 
 To learn more about this dataset:
 
@@ -29,16 +29,16 @@ To learn more about this dataset:
 summary(msleep)
 ```
 
-Notice the bottom row of the summary statistics for `sleep_rem`, `sleep_cycle` and `brainwt`. It gives the count of `NA` values for each variable. The other numeric variables (`sleep_total`, `awake`, and `bodywt`) don't show anything for the `NA` count, which means they have no missing values. 
+Notice the bottom row of the summary statistics for `sleep_rem`, `sleep_cycle` and `brainwt`. It gives the count of `NA` values for each variable. The other numeric variables (`sleep_total`, `awake`, and `bodywt`) don't show anything for the `NA` count, which means they have no missing values.
 
-The `summary` command is most useful for numeric and factor variables. It doesn't show us anything useful for the character variables. We can get better output for those by converting them to factors, though. 
+The `summary` command is most useful for numeric and factor variables. It doesn't show us anything useful for the character variables. We can get better output for those by converting them to factors, though.
 
 We could do this with a `mutate` command for each of the rows we want to convert, like this:
 
 ```{r}
-msleep_clean <- msleep %>% 
-  mutate(name = as.factor(name), 
-         genus = as.factor(genus), 
+msleep_clean <- msleep %>%
+  mutate(name = as.factor(name),
+         genus = as.factor(genus),
          vore = as.factor(vore),
          order = as.factor(order),
          conservation = as.factor(conservation))
@@ -47,13 +47,13 @@ msleep_clean <- msleep %>%
 But in cases like this where we want to convert several variables all in the same way, we can do it faster with the `across` command:
 
 ```{r}
-msleep_clean <- msleep %>% 
+msleep_clean <- msleep %>%
   mutate(across(where(is.character), as.factor))
 ```
 
 Let's break that down. We're using the `across` command to do the same thing across several columns. The first argument of `across` needs to tell it which columns to use. Here, we're telling it which columns to use with `where(is.character)` --- that will check each column against the test `is.character` and return `TRUE` if the column is of type character and `FALSE` if it's anything else. `where(is.character)` will therefore give us a list of all of the columns that are character columns. The second argument of `across` is what you want done to those columns. Here, we're saying we want it to apply the function `as.factor`. So taken together, this `mutate` command will pick all the columns from the data that are of type character and convert them to factor. Handy!
 
-Note that either way of converting these columns (either individually, or all at once using the `across` function) will result in the same clean dataframe. 
+Note that either way of converting these columns (either individually, or all at once using the `across` function) will result in the same clean dataframe.
 
 To learn more about `across` see its help documentation:
 
@@ -74,11 +74,11 @@ Let's use `filter` to take a look at just the rows that have missing values for 
 filter(msleep_clean, brainwt == NA)
 ```
 
-That doesn't work! 
+That doesn't work!
 
 In fact, you may even have noticed a little warning sign appear at the left side of your screen, next to the line number with that code. If you hover your mouse over the warning sign, you'll see a message that says "use 'is.na' to check whether an expression evaluates to NA" --- that's because this is a very common mistake. Most people try `== NA` and `!= NA` to test whether something is or isn't missing, respectively, before they realize R won't allow that.
 
-Instead, to test whether something is missing, we have to use the `is.na()` function. You can negate the function with `!`, so `!is.na()` tests whether something is NOT missing (i.e. if there is present data there). 
+Instead, to test whether something is missing, we have to use the `is.na()` function. You can negate the function with `!`, so `!is.na()` tests whether something is NOT missing (i.e. if there is present data there).
 
 So, let's try again to filter the data to just show rows where we have missing values for `brainwt`:
 
@@ -118,7 +118,7 @@ Fill in this code to mark values for `sleep_total` that are over 18 as missing (
 msleep_clean <- mutate(msleep_clean, sleep_total = ifelse(   ,    ,   ))
 ```
 
-To check that it worked, let's look at the updated summary stats for `sleep_total`: 
+To check that it worked, let's look at the updated summary stats for `sleep_total`:
 
 ```{r}
 summary(msleep_clean$sleep_total)
@@ -134,7 +134,7 @@ You should see that the Max value is now under 18, and you should see some NAs. 
 
 ### na.rm
 
-Many functions in R have an argument `na.rm` with options `TRUE` or `FALSE`. 
+Many functions in R have an argument `na.rm` with options `TRUE` or `FALSE`.
 
 For example, check out the help documentation for `mean`:
 
@@ -142,7 +142,7 @@ For example, check out the help documentation for `mean`:
 ?mean
 ```
 
-Under **Arguments**, you'll see the description for `na.rm` is 
+Under **Arguments**, you'll see the description for `na.rm` is
 
 > a logical value indicating whether NA values should be stripped before the computation proceeds.
 
@@ -154,7 +154,7 @@ Let's try it with the `brainwt` variable in our example data:
 mean(msleep_clean$brainwt)
 ```
 
-There are some missing values in `brainwt`, so right now R is trying to take the mean of several numbers and a handful of `NA`s --- there's no way to get an average for something that's not there, so the result is `NA`. 
+There are some missing values in `brainwt`, so right now R is trying to take the mean of several numbers and a handful of `NA`s --- there's no way to get an average for something that's not there, so the result is `NA`.
 
 Try modifying the code to change the behavior to `na.rm = TRUE`:
 
@@ -162,15 +162,15 @@ Try modifying the code to change the behavior to `na.rm = TRUE`:
 mean(msleep_clean$brainwt, na.rm =    )
 ```
 
-Now you should get a value! That's the average of the available data, ignoring the missing ones. 
+Now you should get a value! That's the average of the available data, ignoring the missing ones.
 
 You'll see `na.rm` as an argument for many functions in R, often with the default set to `FALSE`, as it is for `mean`.
 
 ### na.action
 
-For more complex statistical functions, there's often an `na.action` argument instead of `na.rm`. 
+For more complex statistical functions, there's often an `na.action` argument instead of `na.rm`.
 
-We'll start with the function `prcomp`, which is used to run Principal Components Analysis (PCA). For the purposes of this example, it's perfectly fine if you haven't run a PCA before, or even if you've never heard of it --- we'll just be using it as an example to explore how R handles missing values in statistical analyses. 
+We'll start with the function `prcomp`, which is used to run Principal Components Analysis (PCA). For the purposes of this example, it's perfectly fine if you haven't run a PCA before, or even if you've never heard of it --- we'll just be using it as an example to explore how R handles missing values in statistical analyses.
 
 First, let's take a look at the help documentation for `prcomp`:
 
@@ -178,14 +178,14 @@ First, let's take a look at the help documentation for `prcomp`:
 ?prcomp
 ```
 
-Like many R functions, `prcomp` has an argument called `na.action` which controls what happens when the function encounters missing values. The possible options are usually `na.fail`, `na.omit`, and `na.exclude`. We can see from the help documentation that, unless you've changed some of your settings in R, the default option for `na.action` will be `na.omit`. 
+Like many R functions, `prcomp` has an argument called `na.action` which controls what happens when the function encounters missing values. The possible options are usually `na.fail`, `na.omit`, and `na.exclude`. We can see from the help documentation that, unless you've changed some of your settings in R, the default option for `na.action` will be `na.omit`.
 If we run `prcomp` without specifying anything for `na.action`, it will use this default behavior:
 
 ```{r}
 prcomp(~ sleep_total + sleep_rem + sleep_cycle + awake + brainwt + bodywt, data = msleep_clean)
 ```
 
-One important thing to notice here: Nothing in the output tells you that `prcomp` excluded rows with missing values from the analysis. That how many functions in R work, and it's one reason why it's important to look at the help documentation for functions you're using, so you can see what the function's default behavior for handling missingness is. Without checking the help documentation, you might (wrongly) think that this PCA output was based on all of the observations in your data, not just the complete cases.
+One important thing to notice here: Nothing in the output tells you that `prcomp` excluded rows with missing values from the analysis. That is how many functions in R work, and it's one reason why it's important to look at the help documentation for functions you're using, so you can see what the function's default behavior for handling missingness is. Without checking the help documentation, you might (wrongly) think that this PCA output was based on all of the observations in your data, not just the complete cases.
 
 Modify this code to run it with `na.fail` for the `na.action` instead:
 
@@ -193,12 +193,12 @@ Modify this code to run it with `na.fail` for the `na.action` instead:
 prcomp(~ sleep_total + sleep_rem + sleep_cycle + awake + brainwt + bodywt, data = msleep_clean, na.action =    )
 ```
 
-You should now see an error that includes the message "missing values in object". Some people prefer to use `na.fail` for most functions, because they want to see an error message whenever they have missing values rather than R just silently dropping them. 
+You should now see an error that includes the message "missing values in object". Some people prefer to use `na.fail` for most functions, because they want to see an error message whenever they have missing values rather than R just silently dropping them.
 
 Some R functions will show a warning by default when they remove cases with missing values. For example, let's use `ggplot` to create a scatterplot of `bodywt` and `brainwt`:
 
 ```{r}
-ggplot(msleep_clean, aes(x=bodywt, y=brainwt)) + 
+ggplot(msleep_clean, aes(x=bodywt, y=brainwt)) +
   geom_point()
 ```
 
@@ -212,27 +212,27 @@ Some functions have more complicated options for how to handle missingness. For 
 ?cor
 ```
 
-There are two arguments related to missing values: `na.rm` and `use`. Scroll down to the **Details** section to read more about how they work. Note: The differences between the options is subtle, so don't stress if it feels like you don't understand what they all mean. In most cases, people want either `use = "everything"` or `use = "pairwise.complete.obs"` when they generate a correlation or covariance matrix, so those are the two most important options to focus on. Importantly, the default value for `use` is "everything". 
+There are two arguments related to missing values: `na.rm` and `use`. Scroll down to the **Details** section to read more about how they work. Note: The differences between the options is subtle, so don't stress if it feels like you don't understand what they all mean. In most cases, people want either `use = "everything"` or `use = "pairwise.complete.obs"` when they generate a correlation or covariance matrix, so those are the two most important options to focus on. Importantly, the default value for `use` is "everything".
 
 Let's look at a correlation matrix using the `msleep_clean` data:
 
 ```{r}
-cor(select(msleep_clean, sleep_total:bodywt)) 
+cor(select(msleep_clean, sleep_total:bodywt))
 ```
 
-Since we didn't supply anything for the `use` argument, it will be its default value, which is "everything". That returns an `NA` for any correlation where there were missing values on either of the two variables being compared. 
+Since we didn't supply anything for the `use` argument, it will be its default value, which is "everything". That returns an `NA` for any correlation where there were missing values on either of the two variables being compared.
 
 Try it again, but this time change the behavior to calculate correlations for all pairwise complete observations:
 
 ```{r}
-cor(select(msleep_clean, sleep_total:bodywt), use =       ) 
+cor(select(msleep_clean, sleep_total:bodywt), use =       )
 ```
 
-Tip: Many functions in R, including `cor`, allow you to abbreviate strings for arguments. You may have noticed in the help documentation that for `use` it says the following: 
+Tip: Many functions in R, including `cor`, allow you to abbreviate strings for arguments. You may have noticed in the help documentation that for `use` it says the following:
 
 > This must be (an abbreviation of) one of the strings "everything", "all.obs", "complete.obs", "na.or.complete", or "pairwise.complete.obs".
 
-So, if you want to, you can just write `use = "pairwise"` or even just `use = "p"` and it will know you mean "pairwise.complete.obs". It's good practice to write out the whole argument, though, or at least enough of it so that your meaning is clear, so that your code is easier to read later (you may forget what `p` means, but `pairwise` may be enough for you or someone else reading your code to understand). 
+So, if you want to, you can just write `use = "pairwise"` or even just `use = "p"` and it will know you mean "pairwise.complete.obs". It's good practice to write out the whole argument, though, or at least enough of it so that your meaning is clear, so that your code is easier to read later (you may forget what `p` means, but `pairwise` may be enough for you or someone else reading your code to understand).
 
 
 **RETURN TO THE MODULE NOW** Read the overview of the next section before continuing on with this code.
@@ -251,7 +251,7 @@ nrow(msleep_clean) # how many rows were in the original data
 nrow(msleep_nomissing) # how many complete rows are in the data (rows with no missing values)
 ```
 
-`na.omit` removes rows with missing values on **any** variable. You might prefer to just pick which variable(s) you want complete data for, and only remove rows that have missing values in those key variables (potentially leaving rows that are missing on other variables). 
+`na.omit` removes rows with missing values on **any** variable. You might prefer to just pick which variable(s) you want complete data for, and only remove rows that have missing values in those key variables (potentially leaving rows that are missing on other variables).
 
 For example, if we want to create a version of the data that doesn't have any missing values for `brainwt` (but allows missing values for other variables), we can do that with `filter`:
 
