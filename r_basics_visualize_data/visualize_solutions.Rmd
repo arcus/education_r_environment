@@ -1,6 +1,6 @@
 ---
 title: "Visualize Data"
-output: html_notebook
+output: html_document
 ---
 
 ### Your Turn: The ggplot template and aesthetics
