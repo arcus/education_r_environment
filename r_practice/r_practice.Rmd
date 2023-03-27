@@ -27,7 +27,7 @@ library(janitor)
 library(corrplot)
 ```
 
-Next we need to import our data. We can do this by reading in the CSV using the `read_csv()` function in `dplyr` (part of the `tidyverse`).  
+Next we need to import our data. We can do this by reading in the CSV using the `read_csv()` function in `readr` (part of the `tidyverse`).  
 
 ```{r import-dataset}
 raw_data <- read_csv("http://archive.ics.uci.edu/ml/machine-learning-databases/00383/risk_factors_cervical_cancer.csv")
