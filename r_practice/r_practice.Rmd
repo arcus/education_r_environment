@@ -21,7 +21,7 @@ Also keep in mind that this is an edited final product. The process of creating 
 
 The first thing we'll want to do is to import any libraries/packages that we'll need. You might have to install some or all of these packages using `install.packages()`.
 
-```{r import packages}
+```{r import-packages}
 library(tidyverse)
 library(janitor)
 library(corrplot)
@@ -29,7 +29,7 @@ library(corrplot)
 
 Next we need to import our data. We can do this by reading in the CSV using the `read_csv()` function in `dplyr` (part of the `tidyverse`).  
 
-```{r import dataset}
+```{r import-dataset}
 raw_data <- read_csv("http://archive.ics.uci.edu/ml/machine-learning-databases/00383/risk_factors_cervical_cancer.csv")
 ```
 
@@ -41,7 +41,7 @@ View(raw_data)
 
 Looking through the data, there seem to be a lot of question marks! This is likely indicting missing data. R is not going to be able to handle question marks every well, and it will definitely mess up our math later! Let's re-import the data, letting R know that the question marks should be coded as `NA` (a special value in R that means "empty" or "null").
 
-```{r import data with NA}
+```{r import-data-with-NA}
 cervical_cancer_data <- read_csv("http://archive.ics.uci.edu/ml/machine-learning-databases/00383/risk_factors_cervical_cancer.csv", na = c("?", "NA"))
 ```
 
@@ -69,7 +69,7 @@ names(cervical_cancer_data)
 
 If we look closely, we can see that there are a few columns that are likely True/False (or "logical") variables (like `Smokes` for example) that are being treated like numerical variables. We should look in the data dictionary of the dataset (found here: https://archive.ics.uci.edu/ml/datasets/Cervical+cancer+%28Risk+Factors%29). It's sparse, but we can find out which columns are supposed to be True/False and change those column types. Usually, when data are coded this way, 1 means "True" and 0 means "False". Let's list all of the logical variables and then change their data type using `lapply()` and `as.logical()`.
 
-```{r change variable types}
+```{r change-variable-types}
 logical_cols <- c("smokes", "hormonal_contraceptives", "iud", "stds", 
                   "stds_condylomatosis", "stds_cervical_condylomatosis", 
                   "stds_vaginal_condylomatosis", 
