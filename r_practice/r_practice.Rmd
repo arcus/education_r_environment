@@ -53,21 +53,21 @@ Next, let's dig into the data itself. First, let's look at a statistical summary
 summary(cervical_cancer_data)
 ```
 
-One thing to notice here is that there spaces, capital letters, and colons in our column names. This (especially the spaces) will likely cause problems later when we want to work with the data. Let's change everything to lowercase and replace the spaces and colons with underscores. There are a few ways to do this: 
+One thing to notice here is that there are spaces, capital letters, and colons in our column names. This (especially the spaces) will likely cause problems later when we want to work with the data. Let's change everything to lowercase and replace the spaces and colons with underscores (this is called "snakecase"). There are a few ways to do this: 
 
 1. We could create a vector with all of the new valid column names and replace the old ones. That's a lot of typing on our part though, which leaves lots of places for errors to be introduced! 
 2. We could use the functions `tolower()` to make everything lower case and then use the `str_replace_all()` from the `stringr` library to replace spaces and colons with underscores. This only requires two lines of code-- not bad! 
-3. We could use the `clean_names()` function from the `janitor` library after we make everything lower case (this step isn't always necessary, but it is in this case- trying running the code without the `tolower()` step and see what happens!). 
+3. We could use the `clean_names()` function from the `janitor` library, which will change everything to snakecase in one step.
 
 ```{r}
-names(cervical_cancer_data) <- tolower(names(cervical_cancer_data))
 cervical_cancer_data <- clean_names(cervical_cancer_data)
-names(cervical_cancer_data)
+colnames(cervical_cancer_data)
 ```
 
 ### Recoding Logical Variables
 
-If we look closely, we can see that there are a few columns that are likely True/False (or "logical") variables (like `Smokes` for example) that are being treated like numerical variables. We should look in the data dictionary of the dataset (found here: https://archive.ics.uci.edu/ml/datasets/Cervical+cancer+%28Risk+Factors%29). It's sparse, but we can find out which columns are supposed to be True/False and change those column types. Usually, when data are coded this way, 1 means "True" and 0 means "False". Let's list all of the logical variables and then change their data type using `lapply()` and `as.logical()`.
+If we look closely, we can see that there are a few columns that are likely True/False (or "logical") variables (like `Smokes` for example) that are being treated like numerical variables. We should look in the data dictionary of the dataset (found here: https://archive.ics.uci.edu/ml/datasets/Cervical+cancer+%28Risk+Factors%29). It's sparse, but we can find out which columns are supposed to be True/False and change those column types. Usually, when data are coded this way, 1 means "True" and 0 means "False". 
+Let's list all of the logical variables and then change their data type using `lapply()` and `as.logical()`.
 
 ```{r change-variable-types}
 logical_cols <- c("smokes", "hormonal_contraceptives", "iud", "stds", 
