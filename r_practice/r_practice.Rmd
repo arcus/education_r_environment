@@ -60,14 +60,16 @@ One thing to notice here is that there are spaces, capital letters, and colons i
 3. We could use the `clean_names()` function from the `janitor` library, which will change everything to snakecase in one step.
 
 ```{r}
-cervical_cancer_data <- clean_names(cervical_cancer_data)
+cervical_cancer_data <- clean_names(cervical_cancer_data, parsing_option=3)
 colnames(cervical_cancer_data)
 ```
 
 ### Recoding Logical Variables
 
 If we look closely, we can see that there are a few columns that are likely True/False (or "logical") variables (like `Smokes` for example) that are being treated like numerical variables. We should look in the data dictionary of the dataset (found here: https://archive.ics.uci.edu/ml/datasets/Cervical+cancer+%28Risk+Factors%29). It's sparse, but we can find out which columns are supposed to be True/False and change those column types. Usually, when data are coded this way, 1 means "True" and 0 means "False". 
-Let's list all of the logical variables and then change their data type using `lapply()` and `as.logical()`.
+Let's list all of the logical variables and then change their data type using `mutate()`, `across()` and `as.logical()`.
+
+For more information about using `mutate()` and `across()`, see the examples using `across()` here (scroll down to the examples section): https://dplyr.tidyverse.org/reference/mutate_all.html
 
 ```{r change-variable-types}
 logical_cols <- c("smokes", "hormonal_contraceptives", "iud", "stds", 
@@ -79,7 +81,8 @@ logical_cols <- c("smokes", "hormonal_contraceptives", "iud", "stds",
                   "stds_aids", "stds_hiv", "stds_hepatitis_b", "stds_hpv",
                   "dx_cancer", "dx_cin", "dx_hpv", "dx", "hinselmann",
                   "schiller", "citology", "biopsy")
-cervical_cancer_data[logical_cols] <- lapply(cervical_cancer_data[logical_cols], as.logical)
+
+cervical_cancer_data <- mutate(cervical_cancer_data, across(all_of(logical_cols), as.logical))
 ```
 
 Now that we've done that, let's look at a statistical summary of just the entries where the `dx_cancer` is True. 
