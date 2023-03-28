@@ -24,7 +24,7 @@ The first thing we'll want to do is to import any libraries/packages that we'll 
 ```{r import-packages}
 library(tidyverse)
 library(janitor)
-library(corrplot)
+library(GGally)
 ```
 
 Next we need to import our data. We can do this by reading in the CSV using the `read_csv()` function in `readr` (part of the `tidyverse`).  
@@ -45,7 +45,7 @@ Looking through the data, there seem to be a lot of question marks! This is like
 cervical_cancer_data <- read_csv("http://archive.ics.uci.edu/ml/machine-learning-databases/00383/risk_factors_cervical_cancer.csv", na = c("?", "NA"))
 ```
 
-### Data exploration
+## Data exploration
 
 Next, let's dig into the data itself. First, let's look at a statistical summary table.
 
@@ -94,9 +94,11 @@ cancer_pos <- cervical_cancer_data %>%
 cancer_pos
 ```
 
-### Exploratory data visualization 
+## Exploratory data visualization 
 
 Now, let's do some data visualization to explore the data. We may be able to find patterns that aren't easily seen by looking at numbers alone. 
+
+### Histograms
 
 First, let's look at some histograms using `ggplot`.
 
@@ -110,6 +112,28 @@ ggplot(data = cervical_cancer_data) +
 ggplot(data = cervical_cancer_data) +
   geom_histogram(mapping = aes(x = smokes_years), binwidth = 1)
 ```
+
+**What if you want to see a histogram for every numeric variable in the data?**
+
+We can do that by taking advantage of `pivot_longer` (from the `tidyr` package) and `facet_wrap` (from `ggplot2` package). First, `pivot_longer` transforms the data from wide to long format for all of the numeric columns. This creates a new column called "name" with all of the variable names from the numeric variables, and a column called "value" with the data from those columns. 
+Then, we send that long dataframe to `ggplot` and create a histogram of everything in the `value` column -- this will be all of the values for all of the numeric variables in the data, so one big histogram of all of that wouldn't make any sense. But we can use `facet_wrap` to split the histogram out for each level in the `name` column, i.e. for each variable. 
+
+```{r}
+# first, take a look at what the data look like after transforming to long, just to see the new shape
+cervical_cancer_data %>% 
+  pivot_longer(cols = where(is.numeric), names_to = "name", values_to = "value") %>%
+  View()
+
+# transform the data to long, then create a histogram and use facet_wrap to break it up by variable
+cervical_cancer_data %>% 
+  pivot_longer(cols = where(is.numeric), names_to = "name", values_to = "value") %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x=value)) + 
+  facet_wrap(~ name, scales = "free")
+```
+
+### Scatterplots
+
 How about some scatterplots? 
 
 ```{r}
@@ -122,6 +146,26 @@ ggplot(data = cervical_cancer_data) +
   geom_point(mapping = aes(x = age, y = stds_number))
 ```
 
+Wondering how to get scatterplots for every pair of numeric variables? That's a little trickier than histograms since you need to work with pairs of variables instead of single variables. But luckily there are some ready functions designed to do exactly that!
+
+Option 1: Use the `pairs` function (which is in base R, not the `ggplot2` package we've used for most of our plotting so far). 
+
+```{r}
+cervical_cancer_data %>%
+  select(where(is.numeric)) %>%
+  pairs()
+```
+
+Option 2: Use the `ggpairs` function from the `GGally` package, which is a package with a bunch of functions designed to extend `ggplot2`.
+
+```{r}
+cervical_cancer_data %>%
+  select(where(is.numeric)) %>%
+  ggpairs()
+```
+
+### Boxplots
+
 Let's look at a box plot next.
 
 ```{r}
@@ -129,13 +173,84 @@ ggplot(data = cervical_cancer_data) +
   geom_boxplot(mapping = aes(y = number_of_sexual_partners))
 ```
 
+If you like, you can generate a boxplot for every numeric variable, like we did for the histograms. Give it a try!
+
 ### Heat Maps and correlations
 
-Now, let's take a look at the correlations between all of the variables. We can do this by creating a correlation matrix with the `cor` function. Then, we can visualize those correlations in a heat map using the `corrplot()` function from the library also called `corrplot` (you may need to install this package). 
+Now, let's take a look at the correlations between all of the variables. We can do this by creating a correlation matrix with the `cor` function. Note that correlations should only be computed on numeric variables, so we'll select for just our numeric variables first.
 
 ```{r}
-corr_matrix <- cor(cervical_cancer_data, use="pairwise.complete.obs")
-corrplot(corr_matrix, type = "upper", tl.col = "black", tl.srt = 45, tl.cex = .5)
+corr_matrix <- cor(select(cervical_cancer_data, where(is.numeric)), use="pairwise.complete.obs")
+
+round(corr_matrix, 2) # round to two decimal places to make the numbers easier to read
 ```
 
-In the heat map above, dark blue indicates a highly positive correlation, while dark red indicates a strongly negative correlation. Notice anything interesting? Perhaps this can help you develop a hypothesis and you can test in a later module!
+It can be hard to visually scan numbers, though. 
+We can represent the correlation matrix as a heatmap using `ggcorr` from the `GGally` package. 
+
+```{r}
+cervical_cancer_data %>%
+  select(where(is.numeric)) %>%
+  ggcorr() 
+
+# try adding the argument label=TRUE to the ggcorr() command!
+```
+
+Note that ggcorr defaults to Pearson correlations, and use="pairwise.complete.obs".
+You can change both the type of correlation and the way of handling missing data with the `method` argument in `ggcorr`, see the help documentation (run `?ggcorr` in the console) for details. 
+
+
+## What variables might be related to cancer diagnosis?
+
+First, let's consider our numeric variables. 
+To get an idea of which numeric variables are different for patients with a cancer diagnosis vs. without (TRUE vs. FALSE in the `dx_cancer` variable), let's generate boxplots for all of the variables and separate out on `dx_cancer` by color. 
+
+```{r}
+cervical_cancer_data %>% 
+  pivot_longer(cols = where(is.numeric), names_to = "name", values_to = "value") %>%
+  ggplot() +
+  geom_boxplot(mapping = aes(y=value, fill=dx_cancer)) + 
+  facet_wrap(~ name, scales = "free")
+```
+
+Do you notice any interesting patterns?
+
+Now let's take a look at the other variables in the data, the logical variables. 
+
+```{r}
+cervical_cancer_data %>% 
+  select(where(is.logical)) %>%
+  pivot_longer(cols = -dx_cancer, names_to = "name", values_to = "value") %>%
+  ggplot() +
+  geom_bar(mapping = aes(x=value, fill=dx_cancer), position = "dodge") + 
+  facet_wrap(~ name, scales = "free_y")
+```
+
+Because there are so many more cases without a cancer diagnosis than with, it's hard to see the patterns in the cases where dx_cancer = TRUE. 
+Let's try plotting them separately, using dx_cancer as a second variable in `facet_wrap`. 
+This will create a new plot for each of the logical variables for each level of dx_cancer (so one plot of the biopsy variable for dx_cancer=TRUE, and another plot of the biopsy variable for dx_cancer=FALSE, etc.)
+
+(Another way to compare categorical variables (like the logical variables we're examining here) is with mosaic plots. 
+To learn more, check out the [ggmosaic package](https://haleyjeppson.github.io/ggmosaic/).)
+
+```{r}
+cervical_cancer_data %>% 
+  select(where(is.logical)) %>%
+  pivot_longer(cols = -dx_cancer, names_to = "name", values_to = "value") %>%
+  ggplot() +
+  geom_bar(mapping = aes(x=value, fill=dx_cancer), position = "dodge") + 
+  facet_wrap(~ name + dx_cancer, scales = "free_y")
+```
+
+And here's another option for plotting the same data. There are many, many possible ways to visualize this!
+
+```{r}
+cervical_cancer_data %>% 
+  select(where(is.logical)) %>%
+  pivot_longer(cols = -dx_cancer, names_to = "name", values_to = "value") %>%
+  ggplot() +
+  geom_bar(mapping = aes(x=dx_cancer, fill = value), position = "fill") + 
+  facet_wrap( ~ name , scales = "fixed")
+```
+
+Do you notice any variables that have quite different distributions depending on whether we look at cases where dx_cancer=TRUE vs. dx_cancer=FALSE?
