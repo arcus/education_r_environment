@@ -1,6 +1,11 @@
+---
+title: "Summary Statistics"
+output: html_document
+---
+
 ## Load packages
 
-First, we need to load the `tidyverse` packages, since we'll be using example data and several functions that come in the `tidyverse`. 
+First, we need to load the `tidyverse` packages, since we'll be using several functions that come in the `tidyverse`.
 
 We'll also load the `medicaldata` package, which includes several publicly available data sets with medical data. 
 To learn more, check out the [medicaldata package website](https://higgi13425.github.io/medicaldata/).
