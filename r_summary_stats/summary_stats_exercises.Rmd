@@ -1,18 +1,9 @@
 ---
 title: "Summary Statistics"
-output: html_document
+output: github_document
 ---
 
 ## Load packages
-
-First, we need to load the `tidyverse` packages, since we'll be using several functions that come in the `tidyverse`.
-
-We'll also load the `medicaldata` package, which includes several publicly available data sets with medical data. 
-To learn more, check out the [medicaldata package website](https://higgi13425.github.io/medicaldata/).
-
-And we'll load the `gtsummary` package for creating publication-ready tables. To learn more, see the [gtsummary package website](https://www.danieldsjoberg.com/gtsummary)
-
-If you're running this on your own computer rather than in the cloud instance we set up, you may need to run `install.packages(c("tidyverse", "medicaldata", "gtsummary"))` first if you haven't ever used these packages before.
 
 ```{r}
 library(tidyverse)
@@ -20,46 +11,19 @@ library(medicaldata)
 library(gtsummary)
 ```
 
-
 ## The data
-
-Let's take a look at the data:
 
 ```{r}
 head(cytomegalovirus)
 ```
 
-Note that this is one of the example datasets that comes built-in when you install the `medicaldata` package, so it's already available to you without you having to read it in or download anything.
-
-To learn more about this dataset:
 
 ```{r}
+# To learn more about this dataset
 ?cytomegalovirus
 ```
 
 ## Using `summary()`
-
-The best place to start is often the `summary` function.
-You can run it on an individual column, or on a whole dataframe.
-
-```{r}
-# just on the age column
-summary(cytomegalovirus$age)
-```
-
-```{r}
-# on the whole dataframe
-summary(cytomegalovirus)
-```
-
-The `summary` function checks what type of variable (numeric, categorical/factor, etc.) is in each column and returns sensible summary statistics for each. 
-For a categorical variable (called a factor in R), you get the count for each level, and also a count of how many observations are missing. 
-For numeric variables, you get the range (minimum and maximum), the 1st quartile, median, mean, 3rd quartile, and the count of missing observations. 
-
-In this dataframe, most of the data are numeric.
-There is one column, diagnosis, that shows up as character. 
-If you look at the help documentation for the data set (`?cytomegalovirus`), you'll see that should actually be a factor with 13 levels. 
-If it were a factor, we could get more useful summary statistics for it, too. 
 
 ```{r}
 # convert diagnosis column from character to factor
@@ -69,13 +33,8 @@ cytomegalovirus$diagnosis <- as.factor(cytomegalovirus$diagnosis)
 summary(cytomegalovirus$diagnosis)
 ```
 
-Now we get counts for each type of diagnosis! Much better. 
-
-There are also several other variables that are represented in the data as 0 or 1, but should really be considered as factors. 
-We'll clean those up now. 
-We could do it with individual commands like `cytomegalovirus$sex <- as.factor(cytomegalovirus$sex)`, but instead we'll take a look at another approach:
-
 ```{r}
+# clean up variables that should be factors
 cytomegalovirus <- cytomegalovirus |> 
   mutate(sex = factor(sex, levels = c(0, 1), labels = c("Female", "Male")),
          race = factor(race, levels = c(0, 1), labels = c("African-American", "White")),
@@ -83,73 +42,41 @@ cytomegalovirus <- cytomegalovirus |>
          prior.radiation = factor(prior.radiation, levels = c(0, 1), labels = c("No", "Yes")),
          prior.transplant = factor(prior.transplant, levels = c(0, 1), labels = c("No", "Yes")),
          donor.cmv = factor(donor.cmv, levels = c(0, 1), labels = c("Negative", "Positive")),
+         recipient.cmv = factor(recipient.cmv, levels = c(0, 1), labels = c("Negative", "Positive")),
          donor.sex = factor(donor.sex, levels = c(0, 1), labels = c("Male", "Female")),
          `C1/C2` = factor(`C1/C2`, levels = c(0, 1), labels = c("Heterozygous", "Homozygous")),
          cmv = factor(cmv, levels = c(0, 1), labels = c("No", "Yes")),
          agvhd = factor(agvhd, levels = c(0, 1), labels = c("No", "Yes")),
          cgvhd = factor(cgvhd, levels = c(0, 1), labels = c("No", "Yes"))
          )
-```
 
-Let's break that down. We're using `mutate` to make changes to the columns in the dataframe. You can use `mutate` to create new columns, but in this case we're just overwriting existing columns. Within the mutate command, we have a different argument for each column we want to change. They all take the form `column_name = factor(column_name, levels = c(), labels = c())` where the levels are the existing values in the colum already (e.g. 0 and 1) and labels are what we want them to show up as in the factor (e.g. "no" and "yes"). Note that the order of levels and labels has to line up, so the first level will get the first label, and the second level will get the second label, etc. To learn more about the `factor()` command, check out its help documentation with `?factor`.
-
-Note that either way of converting these columns (either individually, or all at once) will result in the same clean dataframe.
-
-Let's run `summary` on the whole dataframe again to see the results now that we've cleaned up the column types.
-
-```{r}
 summary(cytomegalovirus)
 ```
 
 
 ## Individual summary statistics
 
-What is the shortest time from diagnosis to transplant in the data? You can see in the help documentation for the data (`?cytomegalovirus`) that this is in months. 
-
 ```{r}
 min(cytomegalovirus$time.to.transplant)
-```
 
-Uh-oh! 
-It returns `NA` for this because there is a missing observation for this column. 
-If you look at `?min`, you'll see the default for this function (and most statistics functions in R) is `na.rm = FALSE`, which basically means "only compute a value if there are no missing observations". 
-
-To get the minimum for this column ignoring the missing value, change that to `na.rm = TRUE`.
-
-```{r}
 min(cytomegalovirus$time.to.transplant, na.rm = TRUE)
-```
 
-What is the longest time from diagnosis to transplant?
-
-```{r}
 max(cytomegalovirus$time.to.transplant, na.rm = TRUE)
-```
 
-What is the mean time to transplant?
-
-```{r}
 mean(cytomegalovirus$time.to.transplant, na.rm = TRUE)
-```
 
-Other descriptive stats:
-
-```{r}
 median(cytomegalovirus$time.to.transplant, na.rm = TRUE) # median
 var(cytomegalovirus$time.to.transplant, na.rm = TRUE) # variance
 sd(cytomegalovirus$time.to.transplant, na.rm = TRUE) # standard deviation
-```
 
-The median is the 50th percentile, but you may want other values, like the 25th and 75th percentile. 
-You can get any you want with the `quantile` function:
-
-```{r}
 # the default quantiles
 quantile(cytomegalovirus$time.to.transplant, na.rm = TRUE) 
 
 # custom quantiles
 quantile(cytomegalovirus$time.to.transplant, probs = c(.1, .2, .3, .4), na.rm = TRUE)
 ```
+
+## CODING CHALLENGE 1
 
 **Your turn!**
 
@@ -174,54 +101,51 @@ Hint: try using `select()` to get just the variables you want to work with.
 
 ```
 
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
 
 ## Counts
 
-Getting the counts for a single categorical variable:
-
 ```{r}
-# two ways to do it, both work
+# two ways to get the counts for a single categorical variable
 summary(cytomegalovirus$diagnosis.type)
 table(cytomegalovirus$diagnosis.type)
-```
 
-You can use `summary` to get counts for factors, but it won't work on character vectors, whereas `table` works to get counts on factors or characters. Note that `table` doesn't give you any information about missing values by default, though -- it just gives counts for observations with data. 
-If you want to see missing values using `table`, add the argument `useNA = "always"`:
-
-```{r}
+# how to see missing values with table
 table(cytomegalovirus$diagnosis.type, useNA = "always")
 ```
 
-To get counts of two categorical variables together (e.g. what is the diagnosis type breakdown by recipient CMV status?), use cross-tabulation, also called "crosstabs".
-
 ```{r}
+# counts of two variables at once (cross-tablulation)
 xtabs(~cmv + diagnosis.type, data = cytomegalovirus)
 ```
 
-To get the results of a chi-squared test on the crosstabs, you can apply the `summary` function to an xtabs object:
-
 ```{r}
+# two ways to get the results of a chi-squared test on the crosstab:
+
 # you can nest the summary and xtabs functions
 summary(xtabs(~cmv + diagnosis.type, data = cytomegalovirus))
-```
 
-```{r}
 # or you can save the xtabs object and then run summary() on it
 cmv_and_diagnosistype <- xtabs(~cmv + diagnosis.type, data = cytomegalovirus)
 summary(cmv_and_diagnosistype)
 ```
 
-For beautifully printed crosstabs, see https://www.danieldsjoberg.com/gtsummary/articles/tbl_summary.html#tbl_cross 
+## CODING CHALLENGE 2
 
 **Your turn!** 
 
-Get the counts for both recipient cmv status and donor cmv status, separately. Then generate a crosstab for recipient cmv status and donor cmv status, and get the corresponding chi-squared test of independence. (Hint: If you're not sure what the column names are for those two variables, check the [code book for this dataset](https://www.causeweb.org/tshs/datasets/Cytomegalovirus%20Data%20Dictionary.pdf)).
+Get the counts for both recipient cmv status and donor cmv status, separately. Then generate a crosstab for recipient cmv status and donor cmv status, and get the corresponding chi-squared test of independence. (Hint: If you're not sure what the column names are for those two variables, check the [code book for this dataset](https://www.causeweb.org/tshs/datasets/Cytomegalovirus%20Data%20Dictionary.pdf)) or use `?cytomegalovirus`.
 
 ```{r}
 # get the counts for recipient cmv status
 
 # get the counts for donor cmv status
 
+```
+
+```{r}
 # make a crosstab for recipient cmv status and donor cmv status
 
 # get the chi-squared test of independence for the relationship between recipient cmv status and donor cmv status
@@ -229,87 +153,81 @@ Get the counts for both recipient cmv status and donor cmv status, separately. T
 
 ```
 
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
 
-## Creating Table 1
-
-Many research articles begin with a table summarizing the patients or research subjects analyzed, usually broken down by condition or exposure to allow the reader to see any baseline differences between groups. For example, here is Table 1 from the paper this dataset is from: 
-
-![Table 1 summary statistics on the cytomegalovirus data. ](http://www.ectrx.org/forms/displayimg.php?image_type=big&source=2011-02/v009i01p007-002.png)
-
-One way to create a summary table would be to copy-paste all of your summary stats from R into whatever program you use to write your article. That is both error-prone and tedious, and it also means if anything changes in your data you need to re-do all of that work. 
-
-Another approach is creating the whole table right in R! The `gtsummary` package is a great way to do that. 
-
-We'll recreate an approximation of Table 1 above using `gtsummary`.
-
-Note that the table breaks patients down by whether their aKIRs are 1-4 or 5-6. In the data, aKIRs are just numeric scores 1-6, so first we'll need to create a factor for those two groups. 
+## Creating Table 1 with `gtsummary`
 
 ```{r}
+# first we need to create a factor version of aKIRs, breaking it down as aKIRs 1-4 or aKIRs 5-6
+# we also need to break prior.chemo into a factor with levels 0, 1, 2, 3, and ≥ 4
 cytomegalovirus <- cytomegalovirus |> 
-  mutate(aKIRs_groups = if_else(aKIRs > 4, "5 to 6 aKIRs", "1 to 4 aKIRs"))
+  mutate(aKIRs_groups = if_else(aKIRs > 4, "5 to 6 aKIRs", "1 to 4 aKIRs"),
+         aKIRs_groups = factor(aKIRs_groups, levels = c("1 to 4 aKIRs", "5 to 6 aKIRs")),
+         prior.chemo_groups = if_else(prior.chemo >= 4, "≥ 4", as.character(prior.chemo)),
+         prior.chemo_groups = factor(prior.chemo_groups, levels = c("0", "1", "2", "3", "≥ 4")))
 ```
 
-Now we can use the new `aKIRs_groups` variable in our Table 1
   
 ```{r}  
 cytomegalovirus |>  
-  select(aKIRs_groups, age, sex, race, diagnosis.type, time.to.transplant, prior.chemo, prior.transplant, cmv, donor.cmv) |> 
+  select(aKIRs_groups, age, sex, race, diagnosis.type, time.to.transplant, prior.radiation, prior.chemo_groups, prior.transplant, recipient.cmv, donor.cmv) |> 
   tbl_summary(by = aKIRs_groups) 
+
+# to save re-typing code and highlight just what's new, save the first part
+table_data <- cytomegalovirus |>  
+  select(aKIRs_groups, age, sex, race, diagnosis.type, time.to.transplant, prior.radiation, prior.chemo_groups, prior.transplant, recipient.cmv, donor.cmv)
 ```
 
-This is a decent table! We can add a lot of customization, though, to bring it closer to the publication version. We'll look at a few options now.
 
 ```{r}
 # add a column showing p values
-cytomegalovirus |>  
-  select(aKIRs_groups, age, sex, race, diagnosis.type, time.to.transplant, prior.chemo, prior.transplant, cmv, donor.cmv) |> 
+table_data |> 
   tbl_summary(by = aKIRs_groups) |> 
-  add_p()
+  add_p() 
 ```
 
 ```{r}
 # make the p values round to 2 digits instead of 1, and use t.test instead of wilcoxon rank sum test
-cytomegalovirus |>  
-  select(aKIRs_groups, age, sex, race, diagnosis.type, time.to.transplant, prior.chemo, prior.transplant, cmv, donor.cmv) |> 
+table_data |> 
   tbl_summary(by = aKIRs_groups) |> 
-  add_p(test = list(all_continuous() ~ "t.test"),
-        pvalue_fun = function(x) style_pvalue(x, digits = 2))
+  add_p(test = list(all_continuous() ~ "t.test",
+                    all_categorical() ~ "chisq.test.no.correct"),
+        test.args = all_continuous() ~ list(var.equal = TRUE),
+        pvalue_fun = function(x) style_pvalue(x, digits = 2)) 
 ```
-
-
-So how do you get the table from R to Word? You can save the table as a Word doc, which you can then open and copy into your article. 
-
-To save a table as a Word file, add the following two lines to the end of your table commands:
-
-```{r eval=FALSE}
-# note that this requires a function from the flextable package
-# if you've never used flextable before, you may need to run install.packages("flextable") before this code will work
-
-  as_flex_table() |> 
-  flextable::save_as_docx()
-```
-
-For example, to save the table above, you would do the following:
 
 ```{r}
-cytomegalovirus |>  
-  select(aKIRs_groups, age, sex, race, diagnosis.type, time.to.transplant, prior.chemo, prior.transplant, cmv, donor.cmv) |> 
-  tbl_summary(by = aKIRs_groups) |> 
-  add_p(test = list(all_continuous() ~ "t.test"),
-        pvalue_fun = function(x) style_pvalue(x, digits = 2)) |> 
-  as_flex_table() |> 
-  flextable::save_as_docx()
+# customize the row labels
+table_data |> 
+  tbl_summary(by = aKIRs_groups, 
+              label = list(age ~ "Age at transplant (yrs)",
+                           sex ~ "Sex",
+                           race ~ "Race",
+                           diagnosis.type ~ "Diagnostic category",
+                           time.to.transplant ~ "Months from diagnosis to transplant",
+                           prior.radiation ~ "Prior radiation therapy",
+                           prior.chemo_groups ~ "Number of prior chemotherapy regimens",
+                           prior.transplant ~ "Prior transplants",
+                           recipient.cmv ~ "Recipient CMV seropositive",
+                           donor.cmv ~ "Donor CMV seropositive")) |> 
+  add_p(test = list(all_continuous() ~ "t.test",
+                    all_categorical() ~ "chisq.test.no.correct"),
+        test.args = all_continuous() ~ list(var.equal = TRUE),
+        pvalue_fun = function(x) style_pvalue(x, digits = 2)) 
+
 ```
 
-By default, `flextable::save_as_docx` will save the table in your current working directory. To save it somewhere else, add the `path` argument and specify which folder you want to save it in.
+## CODING CHALLENGE 3
 
 **Your turn!**
 
 Let's try creating Table 1 for a new dataset. We'll use another dataset that's available through the `medicaldata` package, so there's no need to install or import anything else. The data is called `laryngoscope` and it's from a randomized control trial comparing two different laryngoscopes.
 
-Check out the [published article on the laryngoscope data](https://journals.lww.com/anesthesia-analgesia/Fulltext/2011/11000/A_Randomized_Comparison_Between_the_Pentax_AWS.24.aspx) for an overview. Here's Table 1:
+Check out the [published article on the laryngoscope data](https://pubmed.ncbi.nlm.nih.gov/21918156/) for an overview. Here's Table 1:
 
-![Table 1 from the laryngoscope paper.](https://images.journals.lww.com/anesthesia-analgesia/Original.00000539-201111000-00024.T1-24.jpeg)
+![Table 1 from the laryngoscope paper.](https://journals.lww.com/anesthesia-analgesia/_layouts/15/oaks.journals/ImageView.aspx?k=anesthesia-analgesia:2011:11000:00024&i=T1-24&year=2011&issue=11000&article=00024)
 
 Before you start writing code, you'll need to look over the description of the variables in the data, so you know what's what. That's all available in the [codebook](https://www.causeweb.org/tshs/datasets/Laryngoscope%20Data%20Dictionary.pdf), or in the help documentation for the data (run `?laryngoscope` in the console).
 
@@ -325,3 +243,7 @@ Hints:
 - use `tbl_summary` to generate a table of descriptive statistics
 
 There are lots of examples of things to try here https://www.danieldsjoberg.com/gtsummary/articles/tbl_summary.html 
+
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
