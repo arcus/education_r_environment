@@ -133,3 +133,86 @@ ggplot(data = covid_testing) +
   geom_histogram(mapping = aes(x = pan_day)) +
   geom_freqpoly(mapping = aes(x = pan_day))
 ```
+
+
+## More Visualization Options
+
+This section briefly presents additional information to show you some of the possibilities for visualizations in R.  Don't worry about trying to memorize or fully understand how the code works -- this is just to give you some insight into what other things are possible with ggplot2.
+
+**Position Adjustments**
+
+We've only barely scratched the surface of what you can do with ggplots. For example, you can change how overlapping objects are arranged.  For example, instead of a stacked histogram, you can request side-by-side bars.
+
+```{r}
+ggplot(covid_testing) +
+  geom_histogram(
+    mapping = aes(x = pan_day, fill = result),
+    position = position_dodge()
+  )
+```
+
+**Themes**
+
+You can use different themes which affect how non-data elements such as axes, gridlines, and background appear.
+
+```{r}
+ggplot(covid_testing) +
+  geom_histogram(
+    mapping = aes(x = pan_day, fill = result),
+    position = position_dodge()
+  ) +
+  theme_light()
+```
+
+**Scales**
+
+You can customize color scales.
+
+```{r}
+library(colorspace)
+
+cols <- c(
+  "grey80",
+  qualitative_hcl(2, palette = "dark3")
+)
+names(cols) <- c("invalid", "negative", "positive")
+
+ggplot(covid_testing) +
+  geom_histogram(
+    mapping = aes(x = pan_day, fill = result),
+    position = position_dodge()
+  ) +
+  theme_light() +
+  scale_fill_manual(values = cols)
+```
+
+**Facets**
+
+You can facet your plot. That means breaking it into sub-plots by another variable, for example, gender or location in the hospital.
+
+```{r}
+ggplot(covid_testing) +
+  geom_histogram(
+    mapping = aes(x = pan_day, fill = result)
+  ) +
+  theme_light() +
+  scale_fill_manual(values = cols) +
+  facet_wrap(~demo_group)
+```
+
+**Titles and Captions**
+
+And you can add titles, subtitles, or annotations, and change the axis labels or the appearance.
+
+```{r}
+ggplot(covid_testing) +
+    geom_histogram(
+        mapping = aes(x = pan_day, fill = result)
+    ) +
+    theme_light() +
+    facet_wrap(~demo_group) +
+    ggtitle(label = "COVID19 Test Volume",
+         subtitle = "Faceted by Demographic Group") +
+    xlab("Day of Pandemic") +
+    ylab("Number of Tests")
+```
