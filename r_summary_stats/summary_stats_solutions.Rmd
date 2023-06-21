@@ -1,0 +1,332 @@
+---
+title: "Summary Statistics"
+output: github_document
+---
+
+## Load packages
+
+```{r}
+library(tidyverse)
+library(medicaldata) 
+library(gtsummary)
+```
+
+## The data
+
+```{r}
+head(cytomegalovirus)
+```
+
+
+```{r}
+# To learn more about this dataset
+?cytomegalovirus
+```
+
+## Using `summary()`
+
+```{r}
+# convert diagnosis column from character to factor
+cytomegalovirus$diagnosis <- as.factor(cytomegalovirus$diagnosis)
+
+# re-run the summary for that column
+summary(cytomegalovirus$diagnosis)
+```
+
+```{r}
+# clean up variables that should be factors
+cytomegalovirus <- cytomegalovirus |> 
+  mutate(sex = factor(sex, levels = c(0, 1), labels = c("Female", "Male")),
+         race = factor(race, levels = c(0, 1), labels = c("African-American", "White")),
+         diagnosis.type = factor(diagnosis.type, levels = c(0, 1), labels = c("Lymphoid", "Myeloid")),
+         prior.radiation = factor(prior.radiation, levels = c(0, 1), labels = c("No", "Yes")),
+         prior.transplant = factor(prior.transplant, levels = c(0, 1), labels = c("No", "Yes")),
+         donor.cmv = factor(donor.cmv, levels = c(0, 1), labels = c("Negative", "Positive")),
+         recipient.cmv = factor(recipient.cmv, levels = c(0, 1), labels = c("Negative", "Positive")),
+         donor.sex = factor(donor.sex, levels = c(0, 1), labels = c("Male", "Female")),
+         `C1/C2` = factor(`C1/C2`, levels = c(0, 1), labels = c("Heterozygous", "Homozygous")),
+         cmv = factor(cmv, levels = c(0, 1), labels = c("No", "Yes")),
+         agvhd = factor(agvhd, levels = c(0, 1), labels = c("No", "Yes")),
+         cgvhd = factor(cgvhd, levels = c(0, 1), labels = c("No", "Yes"))
+         )
+
+summary(cytomegalovirus)
+```
+
+
+## Individual summary statistics
+
+```{r}
+min(cytomegalovirus$time.to.transplant)
+
+min(cytomegalovirus$time.to.transplant, na.rm = TRUE)
+
+max(cytomegalovirus$time.to.transplant, na.rm = TRUE)
+
+mean(cytomegalovirus$time.to.transplant, na.rm = TRUE)
+
+median(cytomegalovirus$time.to.transplant, na.rm = TRUE) # median
+var(cytomegalovirus$time.to.transplant, na.rm = TRUE) # variance
+sd(cytomegalovirus$time.to.transplant, na.rm = TRUE) # standard deviation
+
+# the default quantiles
+quantile(cytomegalovirus$time.to.transplant, na.rm = TRUE) 
+
+# custom quantiles
+quantile(cytomegalovirus$time.to.transplant, probs = c(.1, .2, .3, .4), na.rm = TRUE)
+```
+
+## CODING CHALLENGE 1
+
+**Your turn!**
+
+What is the average (mean) dose for the following cells: TNC, CD34, CD3, and CD8? (If you're not sure what the column names are for those variables, check the [code book for this dataset](https://www.causeweb.org/tshs/datasets/Cytomegalovirus%20Data%20Dictionary.pdf))
+
+```{r}
+# mean dose for TNC
+mean(cytomegalovirus$TNC.dose, na.rm = TRUE)
+# mean dose for CD34
+mean(cytomegalovirus$CD34.dose, na.rm = TRUE)
+# mean dose for CD3
+mean(cytomegalovirus$CD3.dose, na.rm = TRUE)
+# mean dose for CD8
+mean(cytomegalovirus$CD8.dose, na.rm = TRUE)
+```
+
+Now use `summary()` to get the min, max, median, mean, 25th percentile, 75th percentile, and missingness count for all of the cell dose variables (TNC, CD34, CD3, and CD8). 
+Hint: try using `select()` to get just the variables you want to work with. 
+
+```{r}
+# use summary() to get the min, max, median, mean, 25th percentile, 75th percentile, and missingness count for all of the cell dose variables (TNC, CD34, CD3, and CD8)
+cytomegalovirus |> 
+  select(TNC.dose, CD34.dose, CD3.dose, CD8.dose) |> 
+  summary()
+
+```
+
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
+
+## Counts
+
+```{r}
+# two ways to get the counts for a single categorical variable
+summary(cytomegalovirus$diagnosis.type)
+table(cytomegalovirus$diagnosis.type)
+
+# how to see missing values with table
+table(cytomegalovirus$diagnosis.type, useNA = "always")
+```
+
+```{r}
+# counts of two variables at once (cross-tablulation)
+xtabs(~cmv + diagnosis.type, data = cytomegalovirus)
+```
+
+```{r}
+# two ways to get the results of a chi-squared test on the crosstab:
+
+# you can nest the summary and xtabs functions
+summary(xtabs(~cmv + diagnosis.type, data = cytomegalovirus))
+
+# or you can save the xtabs object and then run summary() on it
+cmv_and_diagnosistype <- xtabs(~cmv + diagnosis.type, data = cytomegalovirus)
+summary(cmv_and_diagnosistype)
+```
+
+## CODING CHALLENGE 2
+
+**Your turn!** 
+
+Get the counts for both recipient cmv status and donor cmv status, separately. Then generate a crosstab for recipient cmv status and donor cmv status, and get the corresponding chi-squared test of independence. (Hint: If you're not sure what the column names are for those two variables, check the [code book for this dataset](https://www.causeweb.org/tshs/datasets/Cytomegalovirus%20Data%20Dictionary.pdf)) or use `?cytomegalovirus`.
+
+```{r}
+# get the counts for recipient cmv status
+summary(cytomegalovirus$cmv)
+
+# get the counts for donor cmv status
+summary(cytomegalovirus$donor.cmv)
+```
+
+```{r}
+# make a crosstab for recipient cmv status and donor cmv status
+cmv_xtab <- xtabs(~cmv + donor.cmv, data = cytomegalovirus)
+
+# get the chi-squared test of independence for the relationship between recipient cmv status and donor cmv status
+summary(cmv_xtab)
+
+cmv_xtab # print out the xtab table itself
+```
+
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
+
+## Creating Table 1 with `gtsummary`
+
+```{r}
+# first we need to create a factor version of aKIRs, breaking it down as aKIRs 1-4 or aKIRs 5-6
+# we also need to break prior.chemo into a factor with levels 0, 1, 2, 3, and ≥ 4
+cytomegalovirus <- cytomegalovirus |> 
+  mutate(aKIRs_groups = if_else(aKIRs > 4, "5 to 6 aKIRs", "1 to 4 aKIRs"),
+         aKIRs_groups = factor(aKIRs_groups, levels = c("1 to 4 aKIRs", "5 to 6 aKIRs")),
+         prior.chemo_groups = if_else(prior.chemo >= 4, "≥ 4", as.character(prior.chemo)),
+         prior.chemo_groups = factor(prior.chemo_groups, levels = c("0", "1", "2", "3", "≥ 4")))
+```
+
+  
+```{r}  
+cytomegalovirus |>  
+  select(aKIRs_groups, age, sex, race, diagnosis.type, time.to.transplant, prior.radiation, prior.chemo_groups, prior.transplant, recipient.cmv, donor.cmv) |> 
+  tbl_summary(by = aKIRs_groups)
+
+# to save re-typing code and highlight just what's new, save the first part
+table_data <- cytomegalovirus |>  
+  select(aKIRs_groups, age, sex, race, diagnosis.type, time.to.transplant, prior.radiation, prior.chemo_groups, prior.transplant, recipient.cmv, donor.cmv)
+```
+
+
+```{r}
+# add a column showing p values
+table_data |> 
+  tbl_summary(by = aKIRs_groups) |> 
+  add_p() 
+```
+
+```{r}
+# make the p values round to 2 digits instead of 1, and use t.test instead of wilcoxon rank sum test
+table_data |> 
+  tbl_summary(by = aKIRs_groups) |> 
+  add_p(test = list(all_continuous() ~ "t.test",
+                    all_categorical() ~ "chisq.test.no.correct"),
+        test.args = all_continuous() ~ list(var.equal = TRUE),
+        pvalue_fun = function(x) style_pvalue(x, digits = 2)) 
+```
+
+```{r}
+# customize the row labels
+table_data |> 
+  tbl_summary(by = aKIRs_groups, 
+              label = list(age ~ "Age at transplant (yrs)",
+                           sex ~ "Sex",
+                           race ~ "Race",
+                           diagnosis.type ~ "Diagnostic category",
+                           time.to.transplant ~ "Months from diagnosis to transplant",
+                           prior.radiation ~ "Prior radiation therapy",
+                           prior.chemo_groups ~ "Number of prior chemotherapy regimens",
+                           prior.transplant ~ "Prior transplants",
+                           recipient.cmv ~ "Recipient CMV seropositive",
+                           donor.cmv ~ "Donor CMV seropositive")) |> 
+  add_p(test = list(all_continuous() ~ "t.test",
+                    all_categorical() ~ "chisq.test.no.correct"),
+        test.args = all_continuous() ~ list(var.equal = TRUE),
+        pvalue_fun = function(x) style_pvalue(x, digits = 2)) 
+
+```
+
+## CODING CHALLENGE 3
+
+**Your turn!**
+
+Let's try creating Table 1 for a new dataset. We'll use another dataset that's available through the `medicaldata` package, so there's no need to install or import anything else. The data is called `laryngoscope` and it's from a randomized control trial comparing two different laryngoscopes.
+
+Check out the [published article on the laryngoscope data](https://pubmed.ncbi.nlm.nih.gov/21918156/) for an overview. Here's Table 1:
+
+![Table 1 from the laryngoscope paper.](https://journals.lww.com/anesthesia-analgesia/_layouts/15/oaks.journals/ImageView.aspx?k=anesthesia-analgesia:2011:11000:00024&i=T1-24&year=2011&issue=11000&article=00024)
+
+Before you start writing code, you'll need to look over the description of the variables in the data, so you know what's what. That's all available in the [codebook](https://www.causeweb.org/tshs/datasets/Laryngoscope%20Data%20Dictionary.pdf), or in the help documentation for the data (run `?laryngoscope` in the console).
+
+
+```{r}
+# Here's a first attempt
+laryngoscope |> 
+  select(Randomization, age, gender, BMI, asa, Mallampati) |> 
+  tbl_summary(by = Randomization)
+```
+
+That's a perfectly respectable table! There are lots of options for customization with tbl_summary, though, so we'll show a few tweaks that bring this table closer to the publication version.
+
+```{r}
+# Let's change the Randomization, gender, and asa variables to have descriptive labels
+# and make Mallampati a factor since it's categorical, but no need to assign labels (it should just print with numbers)
+laryngoscope <- laryngoscope |> 
+  mutate(Randomization = factor(Randomization, levels = c(1, 0), labels = c("Pentax AWS", "Macintosh")),
+         gender = factor(gender, levels = c(0, 1), labels = c("female", "male")),
+         asa = factor(asa, levels = c(2, 3, 4), labels = c("II", "III", "IV")),
+         Mallampati = as.factor(Mallampati))
+
+laryngoscope |> 
+  select(Randomization, age, gender, BMI, asa, Mallampati) |> 
+  tbl_summary(by = Randomization)
+```
+
+```{r}
+# clean up the labels
+laryngoscope |> 
+  select(Randomization, age, gender, BMI, asa, Mallampati) |> 
+  tbl_summary(by = Randomization,
+              label = list(age ~ "Age, y",
+                           gender ~ "Gender",
+                           BMI ~ "Body Mass Index, kg/m2",
+                           asa ~ "ASA physical status",
+                           Mallampati ~ "Mallampati score"))
+```
+
+
+```{r}
+# change the stats displayed to be mean +- SD for continuous variables and number (%) for categorical
+# remove the rows showing missing observations
+laryngoscope |> 
+  select(Randomization, age, gender, BMI, asa, Mallampati) |> 
+  tbl_summary(by = Randomization,
+              label = list(age ~ "Age, y",
+                           gender ~ "Gender",
+                           BMI ~ "Body Mass Index, kg/m2",
+                           asa ~ "ASA physical status",
+                           Mallampati ~ "Mallampati score"),
+              statistic = list(all_continuous() ~ "{mean} ± {sd}",
+                               all_categorical() ~ "{n} ({p})"),
+              missing = "no") 
+```
+
+```{r}
+# add a column for the standardized difference
+laryngoscope |> 
+  select(Randomization, age, gender, BMI, asa, Mallampati) |> 
+  tbl_summary(by = Randomization,
+              label = list(age ~ "Age, y",
+                           gender ~ "Gender",
+                           BMI ~ "Body Mass Index, kg/m2",
+                           asa ~ "ASA physical status",
+                           Mallampati ~ "Mallampati score"),
+              statistic = list(all_continuous() ~ "{mean} ± {sd}",
+                               all_categorical() ~ "{n} ({p})"),
+              missing = "no") |> 
+  add_difference(test = all_continuous() ~ "cohens_d")
+```
+
+
+```{r}
+# hide the CI column
+laryngoscope |> 
+  select(Randomization, age, gender, BMI, asa, Mallampati) |> 
+  tbl_summary(by = Randomization,
+              label = list(age ~ "Age, y",
+                           gender ~ "Gender",
+                           BMI ~ "Body Mass Index, kg/m2",
+                           asa ~ "ASA physical status",
+                           Mallampati ~ "Mallampati score"),
+              statistic = list(all_continuous() ~ "{mean} ± {sd}",
+                               all_categorical() ~ "{n} ({p})"),
+              missing = "no") |> 
+  add_difference(test = all_continuous() ~ "cohens_d") |> 
+  modify_column_hide(ci)
+```
+
+
+Keep playing around with the formatting for the table! There are lots of examples of things to try here https://www.danieldsjoberg.com/gtsummary/articles/tbl_summary.html 
+
+** ---------------------------------------------- **
+** STOP HERE!  Go back to the module to continue. **
+** ---------------------------------------------- **
