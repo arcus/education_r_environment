@@ -6,8 +6,3 @@ dependencies:
   - r-tidyverse
   - r-markdown
   - r-printr
-  - r-medicaldata
-  - r-gtsummary
-  - r-flextable
-  - r-effectsize
-  - r-smd
