@@ -246,13 +246,14 @@ biosample_data_long <- bind_rows(biosample_first, biosample_second) %>%
 ```
 
 What happened?  There's a conflict.  Since we're combining all the values of our data frame to a single column, that single column has to have just one data type.  And that's not what we have.  We have some values that are numbers (like our `id` columns) and some that are text (the rest of our columns).  Let's add another line of code to transform all of values to character.
+The `values_transform` argument works a lot like the `values_fn` argument we used with `pivot_wider`; it will apply a function we specify to everything in the values column. In this case, we're asking it to apply the function `as.character`.
 
 ```{r error = TRUE}
 biosample_data_long <- bind_rows(biosample_first, biosample_second) %>%
     pivot_longer(!biosample_id,
                  names_to = "key",
                  values_to = "value",
-                 values_transform = list(value=as.character))
+                 values_transform = as.character)
 ```
 
 OK!  That time we ran without an error.  Let's look at what that data looks like now:
