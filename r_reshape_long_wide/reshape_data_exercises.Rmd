@@ -268,7 +268,6 @@ It's interesting to realize that if you had other data in some other place relat
 ** STOP HERE!  Go back to the module to continue. **
 ** ---------------------------------------------- **
 
-
 # Pivoting Long Data to Wide
 
 Given that we've got this data in long format already, it will be easy to pivot it back to wide!
