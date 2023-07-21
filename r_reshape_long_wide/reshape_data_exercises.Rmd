@@ -126,13 +126,14 @@ fish_encounters %>%
               values_from =     )
 ```
 
-Great!  We're super close to what we'd like to see.  But it seems that the "1" that appears isn't a count, but rather a logical (True/False) indicator, indicating that a given fish was seen at a given location.  Let's do a quick data transformation to make that more easily understood: We'll transform numbers to T/F (1 is always TRUE, 0 is always FALSE) and then fill any missing values with FALSE.  
+Great!  We're super close to what we'd like to see.  But it seems that the "1" that appears isn't a count, but rather a logical (True/False) indicator, indicating that a given fish was seen at a given location.  
+Let's do a quick data transformation to make that more easily understood: We'll transform numbers to T/F (1 is always TRUE, 0 is always FALSE) and then fill any missing values with FALSE. The argument `values_fn` applies a function to all of the data in the `values_from` column (in our case, `seen`); we're telling it the function we want it to apply is `as.logical` (if you like, you can read about that function by running `?as.logical` in the console). The argument `values_fill` will fill in any missing values in our `values_from` column (again, that's `seen`) with whatever we specify here. In this case, the data are represented as 1 (fish was seen, as.logical will convert this to TRUE) or `NA` (fish was not seen), so we will ask it to fill in those missing values with FALSE. 
 
 ```{r}
 fish_encounters %>%
   pivot_wider(names_from = station, 
               values_from = seen,
-              values_fn = list(seen = as.logical),
+              values_fn = as.logical,
               values_fill = FALSE)
 ```
 
