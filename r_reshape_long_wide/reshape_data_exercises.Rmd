@@ -279,16 +279,18 @@ biosample_data_tidy <- biosample_data_long %>%
 biosample_data_tidy
 ```
 
-Now this data contains the same information we began with, but in a much tidier format.  However, it will be useful to change our data types to be more appropriate.  Let's do that to finish up!  We'll save our really long integer field (biosample_id) as a double, our regular integer fields (the subject_id, collected_by_id, and sequence fields) as integer and our date as date.  We'll leave everything else alone!  We could change the time field from character format to a time format using lubridate, but that work goes a bit beyond the scope of what we want to cover in this module.
+Now this data contains the same information we began with, but in a much tidier format.  However, it will be useful to change our data types to be more appropriate.  Let's do that to finish up!  
+We'll save our really long integer field (biosample_id) as a double, our regular integer fields (the subject_id, collected_by_id, and sequence fields) as integer and our date as date.  We'll leave everything else alone!  
+We could change the time field from character format to a time format using lubridate, but that work goes a bit beyond the scope of what we want to cover in this module.
 
 ```{r}
-biosample_data_tidy %>% mutate(across(biosample_id,
-                                      as.double),
-                               across(c(subject_id, 
-                                      collected_by_id, 
-                                      sequence),
-                                      as.integer),
-                               across(collection_date,
-                                      as.Date))
+biosample_data_tidy <- biosample_data_tidy %>% 
+  mutate(biosample_id = as.double(biosample_id),
+         subject_id = as.integer(subject_id),
+         collected_by_id = as.integer(collected_by_id),
+         sequence = as.integer(sequence),
+         collection_date = as.Date(collection_date))
+
+biosample_data_tidy
 ```
 
