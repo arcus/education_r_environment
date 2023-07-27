@@ -128,3 +128,52 @@ ggplot(data = covid_testing) +
   geom_histogram(mapping = aes(x = pan_day)) +
   geom_freqpoly(mapping = aes(x = pan_day))
 ```
+
+## More Visualization Options
+
+### Position Adjustments
+
+```{r}
+# instead of a stacked histogram, you can request side-by-side bars
+ggplot(covid_testing) +
+  geom_histogram(
+    mapping = aes(x = pan_day, fill = result),
+    position = position_dodge()
+  )
+```
+
+### Themes
+
+```{r}
+# use different themes which affect how non-data elements such as axes, gridlines, and background appear
+
+ggplot(covid_testing) +
+  geom_histogram(
+    mapping = aes(x = pan_day, fill = result),
+    position = position_dodge()
+  ) +
+  theme_light()
+```
+
+### Scales
+
+```{r}
+# customize color scales
+
+library(colorspace)
+
+cols <- c(
+  "grey80",
+  qualitative_hcl(2, palette = "dark3")
+)
+names(cols) <- c("invalid", "negative", "positive")
+
+ggplot(covid_testing) +
+  geom_histogram(
+    mapping = aes(x = pan_day, fill = result),
+    position = position_dodge()
+  ) +
+  theme_light() +
+  scale_fill_manual(values = cols)
+```
+
