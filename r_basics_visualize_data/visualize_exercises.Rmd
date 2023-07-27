@@ -177,3 +177,31 @@ ggplot(covid_testing) +
   scale_fill_manual(values = cols)
 ```
 
+### Facets
+
+```{r}
+# break a plot into sub-plots by another variable
+ggplot(covid_testing) +
+  geom_histogram(
+    mapping = aes(x = pan_day, fill = result)
+  ) +
+  theme_light() +
+  scale_fill_manual(values = cols) +
+  facet_wrap(~demo_group)
+```
+
+### Titles and captions
+
+```{r}
+# add titles, subtitles, or annotations, and change the axis labels or the appearance
+ggplot(covid_testing) +
+    geom_histogram(
+        mapping = aes(x = pan_day, fill = result)
+    ) +
+    theme_light() +
+    facet_wrap(~demo_group) +
+    ggtitle(label = "COVID19 Test Volume",
+         subtitle = "Faceted by Demographic Group") +
+    xlab("Day of Pandemic") +
+    ylab("Number of Tests")
+```
