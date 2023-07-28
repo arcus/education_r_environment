@@ -126,13 +126,14 @@ fish_encounters %>%
               values_from =     )
 ```
 
-Great!  We're super close to what we'd like to see.  But it seems that the "1" that appears isn't a count, but rather a logical (True/False) indicator, indicating that a given fish was seen at a given location.  Let's do a quick data transformation to make that more easily understood: We'll transform numbers to T/F (1 is always TRUE, 0 is always FALSE) and then fill any missing values with FALSE.  
+Great!  We're super close to what we'd like to see.  But it seems that the "1" that appears isn't a count, but rather a logical (True/False) indicator, indicating that a given fish was seen at a given location.  
+Let's do a quick data transformation to make that more easily understood: We'll transform numbers to T/F (1 is always TRUE, 0 is always FALSE) and then fill any missing values with FALSE. The argument `values_fn` applies a function to all of the data in the `values_from` column (in our case, `seen`); we're telling it the function we want it to apply is `as.logical` (if you like, you can read about that function by running `?as.logical` in the console). The argument `values_fill` will fill in any missing values in our `values_from` column (again, that's `seen`) with whatever we specify here. In this case, the data are represented as 1 (fish was seen, as.logical will convert this to TRUE) or `NA` (fish was not seen), so we will ask it to fill in those missing values with FALSE. 
 
 ```{r}
 fish_encounters %>%
   pivot_wider(names_from = station, 
               values_from = seen,
-              values_fn = list(seen = as.logical),
+              values_fn = as.logical,
               values_fill = FALSE)
 ```
 
@@ -245,13 +246,14 @@ biosample_data_long <- bind_rows(biosample_first, biosample_second) %>%
 ```
 
 What happened?  There's a conflict.  Since we're combining all the values of our data frame to a single column, that single column has to have just one data type.  And that's not what we have.  We have some values that are numbers (like our `id` columns) and some that are text (the rest of our columns).  Let's add another line of code to transform all of values to character.
+The `values_transform` argument works a lot like the `values_fn` argument we used with `pivot_wider`; it will apply a function we specify to everything in the values column. In this case, we're asking it to apply the function `as.character`.
 
 ```{r error = TRUE}
 biosample_data_long <- bind_rows(biosample_first, biosample_second) %>%
     pivot_longer(!biosample_id,
                  names_to = "key",
                  values_to = "value",
-                 values_transform = list(value=as.character))
+                 values_transform = as.character)
 ```
 
 OK!  That time we ran without an error.  Let's look at what that data looks like now:
@@ -266,7 +268,6 @@ It's interesting to realize that if you had other data in some other place relat
 ** STOP HERE!  Go back to the module to continue. **
 ** ---------------------------------------------- **
 
-
 # Pivoting Long Data to Wide
 
 Given that we've got this data in long format already, it will be easy to pivot it back to wide!
@@ -279,16 +280,18 @@ biosample_data_tidy <- biosample_data_long %>%
 biosample_data_tidy
 ```
 
-Now this data contains the same information we began with, but in a much tidier format.  However, it will be useful to change our data types to be more appropriate.  Let's do that to finish up!  We'll save our really long integer field (biosample_id) as a double, our regular integer fields (the subject_id, collected_by_id, and sequence fields) as integer and our date as date.  We'll leave everything else alone!  We could change the time field from character format to a time format using lubridate, but that work goes a bit beyond the scope of what we want to cover in this module.
+Now this data contains the same information we began with, but in a much tidier format.  However, it will be useful to change our data types to be more appropriate.  Let's do that to finish up!  
+We'll save our really long integer field (biosample_id) as a double, our regular integer fields (the subject_id, collected_by_id, and sequence fields) as integer and our date as date.  We'll leave everything else alone!  
+We could change the time field from character format to a time format using lubridate, but that work goes a bit beyond the scope of what we want to cover in this module.
 
 ```{r}
-biosample_data_tidy %>% mutate(across(biosample_id,
-                                      as.double),
-                               across(c(subject_id, 
-                                      collected_by_id, 
-                                      sequence),
-                                      as.integer),
-                               across(collection_date,
-                                      as.Date))
+biosample_data_tidy <- biosample_data_tidy %>% 
+  mutate(biosample_id = as.double(biosample_id),
+         subject_id = as.integer(subject_id),
+         collected_by_id = as.integer(collected_by_id),
+         sequence = as.integer(sequence),
+         collection_date = as.Date(collection_date))
+
+biosample_data_tidy
 ```
 
