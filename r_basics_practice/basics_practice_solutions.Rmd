@@ -1,0 +1,165 @@
+---
+title: "R Basics Practice"
+output: html_document
+---
+
+## Step 1: Read in the data using `read_csv()`
+
+Save it as a new data frame called `yaounde_covid_seroprev`.
+
+The dataset is saved online, not locally in this folder. Its location is "https://raw.githubusercontent.com/kendavidn/yaounde_serocovpop_shared/v1.0.0/data/yaounde_covid_seroprev_dataset.csv"
+
+HINT: Remember to load the `tidyverse` package before trying to use the `read_csv()` command.
+
+```{r}
+library(tidyverse)
+
+yaounde_covid_seroprev <- read_csv("https://raw.githubusercontent.com/kendavidn/yaounde_serocovpop_shared/v1.0.0/data/yaounde_covid_seroprev_dataset.csv")
+```
+
+## Step 2: Inspect the data using the Data Viewer.
+
+Open the `yaounde_covid_seroprev` data in the Data Viewer.
+Answer the following questions:
+
+- How many observations (rows) are in the data? How many columns?
+
+There are 1011 rows and 303 columns.
+
+- Sort the data by `val_age`. How old is the youngest person in the data? How old is the oldest?
+
+The youngest person is 5, the oldest is 79.
+
+HINT: Can't find the `val_age` column? Note that RStudio only shows 50 columns at a time, so you may need to click over to the next 50 columns (columns 51-100) to find what you're looking for. Look for where it says "Cols: 1-50" at the top.
+
+## Step 3: Use dplyr to save a version of the data that will be easier to work with
+
+This dataset includes many columns that we don't actually need for our current analysis. 
+Use dplyr to save a new version of the data called `data_cleaned` that selects only the following columns: `val_age`, `had_symp_none`, `cat_igm_result`, and `cat_igg_result`. 
+
+```{r}
+data_cleaned <- select(yaounde_covid_seroprev, val_age, had_symp_none, cat_igm_result, cat_igg_result)
+
+# or, with a pipe (this code will do exactly the same thing):
+data_cleaned <- yaounde_covid_seroprev %>% 
+  select(val_age, had_symp_none, cat_igm_result, cat_igg_result)
+```
+
+
+## Step 4: Inspect the new data in the Data Viewer
+
+Open `data_cleaned` in the Data Viewer, and answer the following questions:
+
+- Filter the data by `had_symp_none` = 0. How many observations reported any symptoms?
+
+There are 303 observations after filtering for `had_symp_none` = 0.
+
+- Remove the filter on `had_symp_none`. Filter the data by `cat_igg_result` = "positif". How many total observations had a positive igg test?
+
+There are 304 observations with a positive igg test (`cat_igg_result` = "positif").
+
+- Of the observations with any symptoms (`had_symp_none` = 0), how many had a positive igg result? How many had a positive igm result?
+
+Filtering for both `had_symp_none` = 0 and `cat_igg_result` = "positif" gives 108 observations.
+Filtering for both `had_symp_none` = 0 and `cat_igm_result` = "positif" gives 12 observations.
+
+## Step 3: Create a histogram
+
+Use ggplot and the `data_cleaned` data frame to create a histogram of `val_age`. Adjust the binwidth until you get something you like.
+
+```{r}
+ggplot(data = data_cleaned) +
+  geom_histogram(mapping = aes(x = val_age))
+```
+
+```{r}
+# try a binwidth of 1 year
+ggplot(data = data_cleaned) +
+  geom_histogram(mapping = aes(x = val_age), binwidth = 1)
+
+# try a binwidth of 10 years
+ggplot(data = data_cleaned) +
+  geom_histogram(mapping = aes(x = val_age), binwidth = 10)
+```
+
+
+Next, map a fill aesthetic to the histogram. Color the bars by `cat_igg_result` by using the `fill` aesthetic.
+
+```{r}
+ggplot(data = data_cleaned) +
+  geom_histogram(mapping = aes(x = val_age, fill = cat_igg_result), binwidth = 5)
+```
+
+## Step 4: Create a boxplot
+
+Try a different geom. Make a boxplot of the same data, `val_age`.
+
+```{r}
+ggplot(data = data_cleaned) +
+  geom_boxplot(mapping = aes(x = val_age))
+```
+
+```{r}
+# here it is with the fill aesthetic added as well
+ggplot(data = data_cleaned) +
+  geom_boxplot(mapping = aes(x = val_age, fill = cat_igg_result))
+```
+
+```{r}
+# note that if you want to, you can specify y = val_age instead of x = val_age
+ggplot(data = data_cleaned) +
+  geom_boxplot(mapping = aes(y = val_age, fill = cat_igg_result))
+```
+
+## Step 5: Create a dplyr pipeline to save just the asymptomatic data
+
+Let's say we want to look specifically at asymptomatic cases.
+
+Create a dplyr pipeline that:
+
+1. Starts with the *yaounde_covid_seroprev* data frame, then
+
+2. Filters to observations that had no symptoms (Hint: `had_symp_none` equal to 1), then
+
+3. Uses `mutate` to create a new column called `log_igg_result` (we're using "log" as short for "logical" here) that is the result of a logical test of whether `cat_igg_result` equals "positif". Do the same for igm results (create a new column called `log_igm_result` that is the result of a logical test of whether `cat_igg_result` equals "positif"). Create a third new column called `log_result` that shows whether the observation had either a positive igg or igm test (HINT: you'll need a logical statement that tests for "`log_igg_result` or `log_igm_result`"). Then,
+
+4. Selects only the columns you want to work with: `val_age`, `cat_igg_result`, `cat_igm_result`, and `log_result`.
+
+5. Saves that as a new dataframe called `asymp_data`.
+
+HINT: Stuck on #3 above? Remember that mutate commands in a pipeline (where the data is being piped in) take the form `mutate(new_col = definition)` where `new_col` is the name of the column you want to create and `definition` is how that column should be specified. In this case, the definition will be a logical statement (remember that logical tests of equality in R need `==`!). A single vertical line `|` is the logical symbol for "or". 
+
+```{r}
+asymp_data <- yaounde_covid_seroprev |> 
+  filter(had_symp_none == 1) |> 
+  mutate(log_igg_result = cat_igg_result == "positif",
+         log_igm_result = cat_igm_result == "positif",
+         log_result = log_igg_result | log_igm_result) |> 
+  select(val_age, cat_igg_result, cat_igm_result, log_result)
+```
+
+
+## Step 6 Create a histogram using the asymptomatic data
+
+1. Create a histogram for `val_age` using the `asymp_data`. 
+
+2. Add a `ggtitle()` layer to make the title "COVID-19 IGG/IGM Testing" with the subtitle "Asymptomatic Cases Only".
+
+3. Add a `xlab()` layer to make the x-axis label "Age (years)"
+
+3. Change the theme using `theme_bw()` (or try out a different theme, if you like!)
+
+4. Add a `facet_wrap()` layer to split it into separate histograms based on the `log_result` column.
+
+```{r}
+ggplot(data = asymp_data) +
+  geom_histogram(mapping = aes(x = val_age), binwidth = 5) + 
+  ggtitle(label = "COVID-19 IGG/IGM Testing", 
+          subtitle = "Asymptomatic Cases Only") + 
+  xlab("Age (years)") +
+  theme_bw() + 
+  facet_wrap(~ log_result)
+```
+
+Well done! That's the end of the practice problems. Return to the module to read the last sections. 
+
