@@ -30,7 +30,7 @@ HINT: Can't find the `val_age` column? Note that RStudio only shows 50 columns a
 This dataset includes many columns that we don't actually need for our current analysis. 
 Use dplyr to save a new version of the data called `data_cleaned` that selects only the following columns: `val_age`, `had_symp_none`, `cat_igm_result`, and `cat_igg_result`. 
 
-HINT: You'll need to add a code chunk here! 
+HINT: You'll need to add a code chunk here! Go back to the [R Basics Intro module](https://liascript.github.io/course/?https://raw.githubusercontent.com/arcus/education_modules/main/r_basics_introduction/r_basics_introduction.md) if you'd like to review of how to do that.
 
 ## Step 4: Inspect the new data in the Data Viewer
 
@@ -53,6 +53,8 @@ HINT: You'll need to add a code chunk here!
 ## Step 4: Create a boxplot
 
 Try a different geom. Make a boxplot of the same data, `val_age`, using `geom_boxplot()`.
+
+HINT: You may not have ever used `geom_boxplot()` before, but don't worry -- it uses all of the same skills you learned for `geom_histogram()`. If you'd like to see another example of trying a different geom on the same data, go back and review the exercise file in the `r_basics_visualize` directory.
 
 HINT: You'll need to add a code chunk here! 
 
