@@ -30,7 +30,7 @@ HINT: Can't find the `val_age` column? Note that RStudio only shows 50 columns a
 This dataset includes many columns that we don't actually need for our current analysis. 
 Use dplyr to save a new version of the data called `data_cleaned` that selects only the following columns: `val_age`, `had_symp_none`, `cat_igm_result`, and `cat_igg_result`. 
 
-
+HINT: You'll need to add a code chunk here! 
 
 ## Step 4: Inspect the new data in the Data Viewer
 
@@ -44,16 +44,17 @@ Open `data_cleaned` in the Data Viewer, and answer the following questions:
 
 Use ggplot and the `data_cleaned` data frame to create a histogram of `val_age`. Adjust the binwidth until you get something you like.
 
-
+HINT: You'll need to add a code chunk here! 
 
 Next, map a fill aesthetic to the histogram. Color the bars by `cat_igg_result` by using the `fill` aesthetic.
 
-
+HINT: You'll need to add a code chunk here! 
 
 ## Step 4: Create a boxplot
 
 Try a different geom. Make a boxplot of the same data, `val_age`, using `geom_boxplot()`.
 
+HINT: You'll need to add a code chunk here! 
 
 ## Step 5: Create a dplyr pipeline to save just the asymptomatic data
 
@@ -73,6 +74,8 @@ Create a dplyr pipeline that:
 
 HINT: Stuck on #3 above? Remember that mutate commands in a pipeline (where the data is being piped in) take the form `mutate(new_col = definition)` where `new_col` is the name of the column you want to create and `definition` is how that column should be specified. In this case, the definition will be a logical statement (remember that logical tests of equality in R need `==`!). A single vertical line `|` is the logical symbol for "or". 
 
+HINT: You'll need to add a code chunk here! 
+
 
 ## Step 6 Create a histogram using the asymptomatic data
 
@@ -82,11 +85,11 @@ HINT: Stuck on #3 above? Remember that mutate commands in a pipeline (where the 
 
 3. Add a `xlab()` layer to make the x-axis label "Age (years)"
 
-3. Change the theme using `theme_bw()` (or try out a different theme, if you like!)
+4. Change the theme using `theme_bw()` (or try out a different theme, if you like!)
 
-4. Add a `facet_wrap()` layer to split it into separate histograms based on the `log_result` column.
+5. Add a `facet_wrap()` layer to split it into separate histograms based on the `log_result` column.
 
-
+HINT: You'll need to add a code chunk here! 
 
 Well done! That's the end of the practice problems. Return to the module to read the last sections. 
 
