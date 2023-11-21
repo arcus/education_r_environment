@@ -23,7 +23,9 @@ Answer the following questions:
 - How many observations (rows) are in the data? How many columns?
 - Sort the data by `val_age`. How old is the youngest person in the data? How old is the oldest?
 
-HINT: Can't find the `val_age` column? Note that RStudio only shows 50 columns at a time, so you may need to click over to the next 50 columns (columns 51-100) to find what you're looking for. Look for where it says "Cols: 1-50" at the top.
+HINT: Can't find the `val_age` column? Note that RStudio only shows 50 columns at a time, so you may need to click over to the next 50 columns (columns 51-100) to find what you're looking for. Look for where it says "Cols: << < 1-50 > >>" at the top:
+
+![Screenshot of the top of RStudio Editor pane, showing columns 1-50 with << and < to page backwards through the columns, and > and >> to page forward.](../media/data_viewer_cols.png)
 
 ## Step 3: Use dplyr to save a version of the data that will be easier to work with
 
